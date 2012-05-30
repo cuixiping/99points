@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <title>HTML5</title>
 <style type="text/css">
-#div_seats .sat { background-color: #ffcc00; padding: auto 10px; }
+#div_seats .sat.odd { background-color: #ffcc00; padding: auto 10px; color: #ff0000; }
+#div_seats .sat.even { background-color: #ccff99; padding: auto 10px; color: #009900; }
+#logs {font-size: 9pt;}
 </style>
 </head>
 
@@ -14,13 +16,28 @@ My Name: <input type="text" id="txtMyName">
 <span id="state">Not Connected.</span>
 
 <br>
+<table>
+	<tr>
+		<td valign="top">
 players:
-<div id="div_players" style="margin-top:0;margin-bottom:0;">
+<div id="div_players">
 </div>
+		</td>
+		<td valign="top">
+<div style="margin-left:40px;">
+player cards:
+<div id="div_playercards">
+</div>
+outhand cards:
+<div id="div_outhandcards">
+</div>
+		</td>
+	</tr>
+</table>
 
 <br>
 seats:
-<div id="div_seats" style="margin-top:0;margin-bottom:0;">
+<div id="div_seats">
 </div>
 
 <div id="chats">
@@ -32,6 +49,7 @@ Chat:
 </div>
 
 <br>
+logs:
 <div id="logs">
 </div>
 
@@ -77,9 +95,8 @@ socket_onopen = function () {
 	actions.login();
 };
 socket_onmessage = function (e) {
-	console.log('onmessage :');
-	console.dir(e);
-	//log('onmessage data: '+e);
+	//console.log('onmessage :');
+	//console.dir(e);
 	if(e.op in handlers){
 		console.log(e.op);
 		console.dir(e.data);
@@ -179,10 +196,18 @@ var handlers = {
 	},
 	playerJoin : function (data){
 		console.log('new user '+data.user.name+' join');
+		players.push(data.user);
+		ui.updatePlayers([data.user]);
 	},
 	playerLeave : function (data){
-		var uid = data.user.id;
-		div_players.removeChild($('player_'+uid));
+		for(var i=0,n=players.length;i<n;i++){
+			var user = players[i];
+			if(user.id == data.user.id){
+				players.splice(i,1);
+				break;
+			}
+		}
+		ui.removePlayer(data.user);
 		console.log('user '+data.user.name+' leave');
 	},
 	sitdown : function (data){
@@ -231,19 +256,25 @@ var ui = {
 			}
 		}
 	},
+	removePlayer : function (user){
+		div_players.removeChild($('player_'+user.id));
+		if(user.seat !== undefined){
+			ui.updateSeat(user.seat, 'sit down', false);
+		}
+	},
 	clearSeats : function (){
 		$('div_seats').innerHTML = '';
 	},
 	createSeats : function (n){
 		for(var i=0,s=[];i<n;i++){
-			s.push('<input type="button" i="'+i+'" id="seat'+i+'" value="#'+i+' sit down"> ');
+			s.push('<input type="button" i="'+i+'" id="seat'+i+'" value="'+i+'# sit down" class="'+(i%2 ? 'odd':'even')+'"> ');
 		}
 		$('div_seats').innerHTML = s.join(' ');
 	},
 	updateSeat : function (seat, name, sat){
 		var ele=$('seat'+seat);
-		ele.value = '#'+seat+' '+name;
-		ele.className = sat?'sat':'';
+		ele.value = seat+'# '+name;
+		ele.className = (sat?'sat ':'')+(seat%2 ? 'odd':'even');
 		ele.disabled = sat;
 	},
 	chat : function (data){
