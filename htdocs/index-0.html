@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>HTML5</title>
+</head>
+
+<body>
+<span id="state">Not Connected.</span>
+<input type="button" value="Connect" id="btnSwitchConn" onclick="switchConn()">
+
+<br>
+Message:<input type="text" id="textMsg">
+<input type="button" value="Send" id="btnSend" onclick="send()" disabled>
+
+<br>
+<div id="log">
+
+</div>
+
+<script type="text/javascript">
+function $(id){return document.getElementById(id);}
+
+var state = $('state'),
+	btnSwitchConn = $('btnSwitchConn'),
+	textMsg = $('textMsg'),
+	btnSend = $('btnSend'),
+	log = $('log');
+
+if (window.MozWebSocket) {
+  window.WebSocket = window.MozWebSocket;
+}
+
+var socket=null;
+
+function connect(){
+	if(socket){
+		console.log('socket is open');
+		return;
+	}
+	socket = new WebSocket('ws://'+location.host);
+	socket.onopen = socket_onopen;
+	socket.onmessage = socket_onmessage;
+	socket.onerror = socket_onerror;
+	socket.onclose = socket_onclose;
+}
+socket_onopen = function (e) {
+	console.log('onopen :');
+	console.dir(e);
+	state.innerHTML='Connected.';
+	btnSwitchConn.value='Disconnect';
+	btnSend.disabled=false;
+};
+socket_onmessage = function (e) {
+	console.log('onmessage data: %s', e.data);
+	var tmp = document.createElement('div');
+	tmp.innerHTML = 'onmessage data: '+e.data;
+	log.appendChild(tmp);
+};
+socket_onerror = function (e) {
+	console.log('onerror :');
+	console.dir(e);
+};
+socket_onclose = function (e) {
+	console.log('onclose :');
+	console.dir(e);
+	socket = null;
+	state.innerHTML='Not Connected.';
+	btnSwitchConn.value='Connect';
+	btnSend.disabled=true;
+};
+function switchConn(){
+	if(socket){
+		if(socket.readyState==WebSocket.OPEN){
+			console.log('close...');
+			socket.close();
+		}
+		else if(socket.readyState==WebSocket.CLOSED){
+			console.log('connect...');
+			connect();
+		}
+		else if(socket.readyState==WebSocket.CONNECTING){
+			console.log('CONNECTING...');
+		}
+		else if(socket.readyState==WebSocket.CLOSING){
+			console.log('CLOSING...');
+		}
+	}else{
+		console.log('connect...');
+		connect();
+	}
+}
+function send(){
+	if(socket && socket.readyState==WebSocket.OPEN){
+		var v=textMsg.value;
+		if(v){
+			console.log('send : %s', v);
+			socket.send(v);
+		}
+		else{
+			alert('please input message');
+		}
+	}
+	else{
+		console.warn('cannot send because socket is not open.');
+	}
+}
+</script>
+
+</body>
+</html>

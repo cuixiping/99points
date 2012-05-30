@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>HTML5</title>
+</head>
+
+<body>
+My Name: <input type="text" id="txtMyName">
+<input type="button" value="Connect" id="btnSwitchConn">
+<span id="state">Not Connected.</span>
+
+<div id="msgs" style="display:none;">
+Message:<input type="text" id="textMsg">
+<input type="button" value="Send" id="btnSend" disabled>
+</div>
+
+<br>
+players:
+<ul id="div_players" style="margin-top:0;margin-bottom:0;">
+
+</ul>
+
+<div id="chats">
+<div id="chatItems">
+
+</div>
+Chat:<input type="text" id="textChat" size="24">
+<input type="button" value="Send" id="btnChat" disabled>
+</div>
+
+<br>
+<div id="logs">
+
+</div>
+
+<script src="lib/socket.io/socket.io.js"></script>
+<script src="ninety-nine.js"></script>
+
+<script type="text/javascript">
+function $(id){return document.getElementById(id);}
+
+var state = $('state'),
+	btnSwitchConn = $('btnSwitchConn'),
+	textMsg = $('textMsg'),
+	btnSend = $('btnSend'),
+	textChat = $('textChat'),
+	btnChat = $('btnChat'),
+	chatItems = $('chatItems'),
+	logs = $('logs');
+var div_players = $('div_players'),
+	txtMyName = $('txtMyName');
+var strMyName;
+var tableId = 1;
+var players = [];
+
+if (window.MozWebSocket) {
+  window.WebSocket = window.MozWebSocket;
+}
+
+var socket=null;
+var socket_config = {
+	'reconnect': false,
+	'auto connect': true
+};
+
+function log(html){
+	var tmp = document.createElement('div');
+	tmp.innerHTML = html;
+	logs.appendChild(tmp);
+}
+socket_onopen = function () {
+	console.log('onopen :');
+	state.innerHTML='Connected.';
+	btnSwitchConn.value='Disconnect';
+	btnSend.disabled=false;
+	btnChat.disabled=false;
+	actions.login();
+};
+socket_onmessage = function (e) {
+	console.log('onmessage :');
+	console.dir(e);
+	//log('onmessage data: '+e);
+	if(e.op in handlers){
+		console.log(e.op);
+		console.dir(e.data);
+		handlers[e.op](e.data);
+	}
+};
+socket_onerror = function (e) {
+	console.log('onerror :');
+	console.dir(e);
+};
+socket_onclose = function () {
+	console.log('onclose .');
+	//socket = null;
+	state.innerHTML='Not Connected.';
+	btnSwitchConn.value='Connect';
+	btnSend.disabled=true;
+	btnChat.disabled=true;
+};
+var actions = {
+	login : function (){
+		socket.emit('message', {op:'login', data:strMyName});
+	},
+	play : function (){
+	},
+	playerJoin : function (){
+	},
+	playerLeave : function (){
+	},
+	chat : function (){
+		var v=textChat.value;
+		if(v){
+			socket.emit('message', {op:'chat', data:{msg:v}});
+		}
+		else{
+			alert('please input message');
+		}
+	},
+	start : function (){
+	}
+};
+var handlers = {
+	welcome : function (data){
+		log(data);
+	},
+	getTables : function (data){
+	},
+	getPlayers : function (data){
+		players = data;
+		for(var i=0,n=data.length;i<n;i++){
+			var user = data[i];
+			if(!$('player_'+user.id)){
+				var tmp = document.createElement('li');
+				tmp.id = 'player_'+user.id;
+				tmp.innerHTML = user.name;
+				div_players.appendChild(tmp);
+			}
+		}
+	},
+	playerJoin : function (data){
+		var tmp = document.createElement('li');
+		tmp.id = 'player_'+data.user.id;
+		tmp.innerHTML = data.user.name;
+		div_players.appendChild(tmp);
+		console.log('new user '+data.user.name+' join');
+	},
+	playerLeave : function (data){
+		var uid = data.user.id;
+		div_players.removeChild($('player_'+uid));
+		console.log('user '+data.user.name+' leave');
+	},
+	chat : function (data){
+		appendHTML($('chatItems'), '<div>* '+data.user.name+': '+data.msg+'</div>');
+	},
+	play : function (data){
+	}
+};
+function appendHTML(target,html){
+	target.insertAdjacentHTML('BeforeEnd',html);
+	//var f = window.frg || (window.frg=document.createDocumentFragment());
+	//if(!frg.firstChild){
+		//frg.appendChild(document.createElement('div'));
+	//}
+	//frg.firstChild.innerHTML = html;
+	//target.appendChild(frg);
+}
+function connect(){
+	if(socket && socket.socket.connected){
+		console.log('socket is open');
+		return;
+	}
+	strMyName = txtMyName.value;
+	if(!strMyName){
+		alert('please input player name');
+		return;
+	}
+	if(socket){
+		socket.socket.reconnect();
+	}else{
+		socket = io.connect('ws://'+location.host, socket_config);
+		socket.on('connect', socket_onopen);
+		socket.on('message', socket_onmessage);
+		socket.on('error', socket_onerror);
+		socket.on('disconnect', socket_onclose);
+	}
+	console.log('connect() called.');
+}
+function switchConn(){
+	if(socket){
+		//var websocket = socket.socket.transport.websocket;
+		if(socket.socket.connected){
+			console.log('close...');
+			socket.disconnect();
+			div_players.innerHTML='';
+		}
+		else if(socket.socket.connecting){
+			console.log('CONNECTING...');
+		}
+		else if(!socket.socket.connected){
+			console.log('connect (1)...');
+			connect();
+		}
+	}else{
+		console.log('connect (2)...');
+		connect();
+	}
+}
+function send(){
+	if(socket && socket.socket.connected){
+		var v=textMsg.value;
+		if(v){
+			console.log('send message: %s', v);
+			socket.emit('message', v);
+		}
+		else{
+			alert('please input message');
+		}
+	}
+	else{
+		console.warn('cannot send because socket is not open.');
+	}
+}
+
+
+btnSwitchConn.onclick = switchConn;
+btnSend.onclick = send;
+btnChat.onclick = actions.chat;
+
+</script>
+
+</body>
+</html>
