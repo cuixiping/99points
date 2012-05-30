@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <title>HTML5</title>
+<style type="text/css">
+#div_seats .sat { background-color: #ffcc00; padding: auto 10px; }
+</style>
 </head>
 
 <body>
@@ -10,28 +13,26 @@ My Name: <input type="text" id="txtMyName">
 <input type="button" value="Connect" id="btnSwitchConn">
 <span id="state">Not Connected.</span>
 
-<div id="msgs" style="display:none;">
-Message:<input type="text" id="textMsg">
-<input type="button" value="Send" id="btnSend" disabled>
+<br>
+players:
+<div id="div_players" style="margin-top:0;margin-bottom:0;">
 </div>
 
 <br>
-players:
-<ul id="div_players" style="margin-top:0;margin-bottom:0;">
-
-</ul>
+seats:
+<div id="div_seats" style="margin-top:0;margin-bottom:0;">
+</div>
 
 <div id="chats">
+Chat:
 <div id="chatItems">
-
 </div>
-Chat:<input type="text" id="textChat" size="24">
+<input type="text" id="textChat" size="24">
 <input type="button" value="Send" id="btnChat" disabled>
 </div>
 
 <br>
 <div id="logs">
-
 </div>
 
 <script src="lib/socket.io/socket.io.js"></script>
@@ -42,8 +43,6 @@ function $(id){return document.getElementById(id);}
 
 var state = $('state'),
 	btnSwitchConn = $('btnSwitchConn'),
-	textMsg = $('textMsg'),
-	btnSend = $('btnSend'),
 	textChat = $('textChat'),
 	btnChat = $('btnChat'),
 	chatItems = $('chatItems'),
@@ -51,8 +50,9 @@ var state = $('state'),
 var div_players = $('div_players'),
 	txtMyName = $('txtMyName');
 var strMyName;
-var tableId = 1;
+var tableId = null;
 var players = [];
+var myuserId = null;
 
 if (window.MozWebSocket) {
   window.WebSocket = window.MozWebSocket;
@@ -70,11 +70,10 @@ function log(html){
 	logs.appendChild(tmp);
 }
 socket_onopen = function () {
-	console.log('onopen :');
-	state.innerHTML='Connected.';
-	btnSwitchConn.value='Disconnect';
-	btnSend.disabled=false;
-	btnChat.disabled=false;
+	console.log('onopen : '+socket.socket.sessionid); //socket.id is undefined now
+	myuserId = socket.socket.sessionid;
+	ui.updateConnState(true);
+	ui.createSeats(8);
 	actions.login();
 };
 socket_onmessage = function (e) {
@@ -94,23 +93,70 @@ socket_onerror = function (e) {
 socket_onclose = function () {
 	console.log('onclose .');
 	//socket = null;
-	state.innerHTML='Not Connected.';
-	btnSwitchConn.value='Connect';
-	btnSend.disabled=true;
-	btnChat.disabled=true;
+	players.length = 0;
+	ui.clearPlayers();
+	ui.clearSeats();
+	ui.updateConnState(false);
 };
 var actions = {
+	connect : function (){
+		if(socket && socket.socket.connected){
+			console.log('socket is already connected');
+			return;
+		}
+		strMyName = ui.getMyName();
+		if(!strMyName){
+			ui.alert('please input player name');
+			console.log('socket not connect. require name.');
+			return;
+		}
+		if(socket){
+			socket.socket.reconnect();
+			console.log('reconnect');
+		}else{
+			socket = io.connect('ws://'+location.host+'/99points', socket_config);
+			socket.on('connect', socket_onopen);
+			socket.on('message', socket_onmessage);
+			socket.on('error', socket_onerror);
+			socket.on('disconnect', socket_onclose);
+			console.log('new connect');
+		}
+	},
+	switchConn : function (){
+		if(socket){
+			//var websocket = socket.socket.transport.websocket;
+			if(socket.socket.connected){
+				console.log('close...');
+				socket.socket.disconnect();
+			}
+			else if(socket.socket.connecting){
+				console.log('CONNECTING...');
+			}
+			else if(!socket.socket.connected){
+				console.log('connect (1)...');
+				actions.connect();
+			}
+		}else{
+			console.log('connect (2)...');
+			actions.connect();
+		}
+	},
 	login : function (){
 		socket.emit('message', {op:'login', data:strMyName});
 	},
 	play : function (){
+	},
+	sitdown : function (e){
+		var i=ui.getSeatFromEvent(e);
+		if(i===null)return;
+		socket.emit('message', {op:'sitdown', data:{seat:+i}});
 	},
 	playerJoin : function (){
 	},
 	playerLeave : function (){
 	},
 	chat : function (){
-		var v=textChat.value;
+		var v=ui.getChatMessage();
 		if(v){
 			socket.emit('message', {op:'chat', data:{msg:v}});
 		}
@@ -129,21 +175,9 @@ var handlers = {
 	},
 	getPlayers : function (data){
 		players = data;
-		for(var i=0,n=data.length;i<n;i++){
-			var user = data[i];
-			if(!$('player_'+user.id)){
-				var tmp = document.createElement('li');
-				tmp.id = 'player_'+user.id;
-				tmp.innerHTML = user.name;
-				div_players.appendChild(tmp);
-			}
-		}
+		ui.updatePlayers(data);
 	},
 	playerJoin : function (data){
-		var tmp = document.createElement('li');
-		tmp.id = 'player_'+data.user.id;
-		tmp.innerHTML = data.user.name;
-		div_players.appendChild(tmp);
 		console.log('new user '+data.user.name+' join');
 	},
 	playerLeave : function (data){
@@ -151,10 +185,74 @@ var handlers = {
 		div_players.removeChild($('player_'+uid));
 		console.log('user '+data.user.name+' leave');
 	},
+	sitdown : function (data){
+		if(data.seatOld !== undefined){
+			ui.updateSeat(data.seatOld, 'sit down', false);
+		}
+		ui.updateSeat(data.seat, data.user.name, true);
+	},
+	chat : function (data){
+		ui.chat(data);
+	},
+	play : function (data){
+	}
+};
+var ui = {
+	alert : function (s){
+		alert(s);
+	},
+	getMyName : function (e){
+		return txtMyName.value;
+	},
+	getChatMessage : function (e){
+		return textChat.value;
+	},
+	getSeatFromEvent : function (e){
+		return e.target.getAttribute('i');
+	},
+	clearPlayers : function (data){
+		div_players.innerHTML = '';
+	},
+	updatePlayers : function (data){
+		for(var i=0,n=data.length;i<n;i++){
+			var user = data[i];
+			if(user==null){
+				console.warn('updatePlayers :: invalid user data');
+				break;
+			}
+			if(!$('player_'+user.id)){
+				var tmp = document.createElement('div');
+				tmp.id = 'player_'+user.id;
+				tmp.innerHTML = user.name;
+				div_players.appendChild(tmp);
+				if(user.seat !== undefined){
+					ui.updateSeat(user.seat, user.name, true);
+				}
+			}
+		}
+	},
+	clearSeats : function (){
+		$('div_seats').innerHTML = '';
+	},
+	createSeats : function (n){
+		for(var i=0,s=[];i<n;i++){
+			s.push('<input type="button" i="'+i+'" id="seat'+i+'" value="#'+i+' sit down"> ');
+		}
+		$('div_seats').innerHTML = s.join(' ');
+	},
+	updateSeat : function (seat, name, sat){
+		var ele=$('seat'+seat);
+		ele.value = '#'+seat+' '+name;
+		ele.className = sat?'sat':'';
+		ele.disabled = sat;
+	},
 	chat : function (data){
 		appendHTML($('chatItems'), '<div>* '+data.user.name+': '+data.msg+'</div>');
 	},
-	play : function (data){
+	updateConnState : function (state){
+		state.innerHTML=state?'Connected.':'Not Connected.';
+		btnSwitchConn.value=state?'Disconnect':'Connect';
+		btnChat.disabled=!state;
 	}
 };
 function appendHTML(target,html){
@@ -166,67 +264,20 @@ function appendHTML(target,html){
 	//frg.firstChild.innerHTML = html;
 	//target.appendChild(frg);
 }
-function connect(){
-	if(socket && socket.socket.connected){
-		console.log('socket is open');
-		return;
-	}
-	strMyName = txtMyName.value;
-	if(!strMyName){
-		alert('please input player name');
-		return;
-	}
-	if(socket){
-		socket.socket.reconnect();
-	}else{
-		socket = io.connect('ws://'+location.host, socket_config);
-		socket.on('connect', socket_onopen);
-		socket.on('message', socket_onmessage);
-		socket.on('error', socket_onerror);
-		socket.on('disconnect', socket_onclose);
-	}
-	console.log('connect() called.');
-}
-function switchConn(){
-	if(socket){
-		//var websocket = socket.socket.transport.websocket;
-		if(socket.socket.connected){
-			console.log('close...');
-			socket.disconnect();
-			div_players.innerHTML='';
-		}
-		else if(socket.socket.connecting){
-			console.log('CONNECTING...');
-		}
-		else if(!socket.socket.connected){
-			console.log('connect (1)...');
-			connect();
-		}
-	}else{
-		console.log('connect (2)...');
-		connect();
-	}
-}
-function send(){
-	if(socket && socket.socket.connected){
-		var v=textMsg.value;
-		if(v){
-			console.log('send message: %s', v);
-			socket.emit('message', v);
-		}
-		else{
-			alert('please input message');
-		}
-	}
-	else{
-		console.warn('cannot send because socket is not open.');
-	}
-}
 
-
-btnSwitchConn.onclick = switchConn;
-btnSend.onclick = send;
+btnSwitchConn.onclick = actions.switchConn;
 btnChat.onclick = actions.chat;
+$('div_seats').onclick = actions.sitdown;
+$('txtMyName').onkeypress = function (e){
+	if(e.which==13){
+		actions.switchConn();
+	}
+};
+$('textChat').onkeypress = function (e){
+	if(e.which==13 && !btnChat.disabled){
+		actions.chat();
+	}
+};
 
 </script>
 

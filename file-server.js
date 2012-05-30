@@ -20,24 +20,24 @@ var app = require('http').createServer(function (request, response) {
 	});
 });
 
-io = io.listen(app, { log: false, 'log level':1 });
+var mgr = io.listen(app, { log: false, 'log level':1 });
 
 app.listen(port);
 
-io.sockets.on('connection', function (socket) {
+mgr.of('/99points').on('connection', function (socket) {
 	console.log('----------- connection : '+socket.id+' ------------');
 
 	//console.log('\n----------- socket : ------------');
 	//console.dir(socket);
 
-	//console.log('\n----------- io.sockets : ------------');
-	//console.dir(io.sockets);
+	//console.log('\n----------- mgr.sockets : ------------');
+	//console.dir(mgr.sockets);
 
 	//console.dir(socket);
 	/*
 		socket.emit('news', { hello: 'world' });
 
-		io.sockets.emit('this', { will: 'be received by everyone' });
+		mgr.sockets.emit('this', { will: 'be received by everyone' });
 
 		socket.on('message', function (data) {
 			console.log('message ' + data);
@@ -68,47 +68,63 @@ io.sockets.on('connection', function (socket) {
 	});
 });
 
+var actions = {
+	messageInTable : function (data){
+		mgr.of('/99points').in('table01').emit('message', data);
+	}
+};
+
+var tableSockets=null;
+
 var handlers = {
 	login : function (socket, data){
+		socket.join('table01');
 		socket.emit('message', {op:'welcome', data:'Hi, '+data});
-		socket.user = {id: socket.id, name: data || 'Guest'};
+		tableSockets = mgr.of('/99points').in('table01').sockets;
+		tableSockets[socket.id].user = socket.user = {id: socket.id, name: data || 'Guest'};
 
 		handlers.playerJoin(socket);
 		handlers.getTables(socket);
 		handlers.getPlayers(socket);
 	},
 	getTables : function (socket, data){
-		var tablsData = [{}];
+		var tablsData = [{id:'table01'}];
 		socket.emit('message', {op:'getTables', data:tablsData});
 	},
 	getPlayers : function (socket, data){
 		var playersData = [];
-		var sks = io.sockets.sockets;
+		var sks = tableSockets;
 		for(var id in sks){
 			playersData.push(sks[id].user);
 		}
 		socket.emit('message', {op:'getPlayers', data:playersData});
 	},
 	playerJoin : function (socket, data){
-		io.sockets.emit('message', {op:'playerJoin', data:{user:socket.user}});
+		actions.messageInTable({op:'playerJoin', data:{user:socket.user}});
 	},
 	playerLeave : function (socket, data){
-		io.sockets.emit('message', {op:'playerLeave', data:{user:socket.user}});
+		actions.messageInTable({op:'playerLeave', data:{user:socket.user}});
+	},
+	sitdown : function (socket, data){
+		var seatOld = socket.user.seat;
+		socket.user.seat = +data.seat;
+		actions.messageInTable({op:'sitdown', data:{seat:+data.seat, seatOld:seatOld, user:socket.user}});
 	},
 	play : function (socket, data){
-		io.sockets.emit('play', data);
+		actions.messageInTable({op:'play', data:data});
 	},
 	chat : function (socket, data){
 		var chatData = {
 			user:socket.user,
 			msg: data.msg
 		};
-		if(data.to && (data.to in io.sockets.sockets)){
+		var sks = tableSockets;
+		if(data.to && (data.to in sks)){
 			chatData.secret = true;
-			io.sockets.sockets[data.to].emit('message', {op:'chat', data:chatData});
+			sks[data.to].emit('message', {op:'chat', data:chatData});
 		}
 		else{
-			io.sockets.emit('message', {op:'chat', data:chatData});
+			actions.messageInTable({op:'chat', data:chatData});
 		}
 	}
 };
@@ -118,7 +134,7 @@ function disconnect(socket, data){
 }
 
 function sendPrivateMessageTo(id,msg){
-	io.sockets.socket(id).emit('private message', msg);
+	mgr.sockets.socket(id).emit('private message', msg);
 }
 
 util.puts("> node-static is listening on port "+port);
