@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="99points : 99points is a multi-player online card game developed by html5 and javascript." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>99points</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/cuixiping/99points">View on GitHub</a>
+
+          <h1 id="project_title">99points</h1>
+          <h2 id="project_tagline">99points is a multi-player online card game developed by html5 and javascript.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/cuixiping/99points/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/cuixiping/99points/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>“99分”html5游戏项目简介：</h3>
+
+<ul>
+<li>在浏览器里玩的多人99分扑克牌游戏；</li>
+<li>代码分前后端两部分，都使用Javascript构建；</li>
+<li>前端代码基于HTML5 Canvas；</li>
+<li>服务器端代码使用Node.Js + Socket.io + Node.static构建；</li>
+<li>前后端都开源。 </li>
+</ul><h3>主创人员</h3>
+
+<p>Igin (<a href="https://github.com/cuixiping" class="user-mention">@cuixiping</a>), Xiaole, Jerrod. </p>
+
+<h3>目前正在第一阶段开发中，暂时不能运行。</h3>
+
+<h3>游戏规则介绍</h3>
+
+<h2>游戏过程</h2>
+
+<ul>
+<li>   游戏至少2人参与，可以分成两组对战或各自单战；</li>
+<li>   游戏时每个玩家抓5张牌，然后轮流出牌，剩下的牌为底牌；</li>
+<li>   打出的如果是功能牌，则执行相应的功能；</li>
+<li>   打出的如果是分数牌，则分值计入分数池累积。</li>
+<li>   分数池分值上限为99分；</li>
+<li>   除4，J外，其余牌打出后可以再补一张牌； </li>
+</ul><h2>牌面</h2>
+
+<ul>
+<li>   4/7/10/J/Q/K/A/小王/大王是“功能牌”；</li>
+<li>   其他的牌都是“分数牌”，牌面数值即代表分值。</li>
+<li>   根据人数多少使用一到两副扑克牌；</li>
+<li>   牌面不分花色； </li>
+</ul><h2>出局</h2>
+
+<ul>
+<li>   如果某玩家出牌后使分数池分值大于99分，则该人丢弃手中全部牌并出局。</li>
+<li>   如果某玩家出牌后手上无牌，则出局。 </li>
+</ul><h2>功能牌</h2>
+
+<ul>
+<li>   4： 转换出牌方向（顺时针变逆时针，逆时针变顺时针）；</li>
+<li>   7： 和指定的某人交换手头的全部牌，操作结束不补牌；</li>
+<li>   10：可以选择让分数池分值减10分或加10分；</li>
+<li>   J： 从其它玩家手中抽一张牌给自己，操作结束不补牌；</li>
+<li>   Q： 可以选择让分数池分值减20分或加20分；</li>
+<li>   K： 分数池加至99分，如果分数池本来就是99分则不作用；</li>
+<li>   A： 指定某玩家出牌；</li>
+<li>   小王：加害，从某玩家该人手上任意抽取一张牌，该人只能留下这张牌，其他牌都放回底牌；</li>
+<li>   大王：拯救，指定复活某个已出局的玩家并补全5张牌，或让某个未出局的玩家补全5张牌； </li>
+</ul><h2>胜负</h2>
+
+<ul>
+<li>   如果不分组，则剩下最后一人为赢家。</li>
+<li>   如果分组游戏，对手组成员全部出局则为赢家。 </li>
+</ul><pre><code>$ cd your_repo_root/repo_name
+$ git fetch origin
+$ git checkout gh-pages
+</code></pre>
+
+<h3>Rather Drive Stick?</h3>
+
+<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">99points maintained by <a href="https://github.com/cuixiping">cuixiping</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
