@@ -5,14 +5,20 @@
 		<title>poker lib demo</title>
 	</head>
 	<body>
+		<input type="text" id="pokerh" value="120" /><input type="button" value="redraw" onclick="showpoker(document.getElementById('pokerh').value);" />
 		<canvas id="ct" width="2000" height="1000"></canvas>
 		<script src="../lib/poker.min.js"></script>
 		<script>
-			var ctx;
+			var ct, ctx;
 
-			window.onload = function() {
-				if(poker.enabled) {poker.w = 150, poker.h = 200;
-					ctx = document.getElementById('ct').getContext('2d');
+			window.onload = function(){ showpoker(100); }
+			
+			function showpoker(h) {
+				if(poker.enabled) {
+					poker.w = 0.75*h, poker.h = +(h);
+					ct = ctx = document.getElementById('ct');
+					ct.width = ct.width;
+					ctx = ct.getContext('2d');
 					var x = 0, y = 0, suits = ['hearts', 'diamonds', 'spades', 'clubs'], points = ['a', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'j', 'q', 'k'];
 					for(var ks in suits) {
 						for(var kp in points) {
