@@ -106,7 +106,7 @@ chat : function (){
 		socket.emit('message', {op:'play', data:{seat:seat, card:card}});
 	}
 	else if(request_type === 'selfcard'){
-		if(seat==myseatId){
+		if(seat!==myseatId){
 			ui.alert('请选自己的牌');
 			return;
 		}

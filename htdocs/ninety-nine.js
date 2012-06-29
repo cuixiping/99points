@@ -27,10 +27,11 @@ Card.prototype = {
 function Game(){
 	this.reset();
 }
+Game.ERR_INVALID = -100;
 Game.prototype = {
 	/* 重置初始状态 */
 	reset : function (keep){
-		this.points=0;         //当前牌面总分
+		this.point=0;         //当前牌面总分
 		this.direction=1;      //1顺时针(0,1,2...)，-1逆时针(0,7,6,5...)
 		this.currSeat=-1;      //当前出牌权在哪个座位, -1表示未知
 		if(keep!==true){
@@ -88,15 +89,19 @@ Game.prototype = {
 	/* 开始发牌，出牌时以最先Ready的玩家开始 */
 	start : function (){
 		//需要先保证都ready之后才调用start方法
-		var team,i;
+		var team,i,j;
 		this.initCards();
-		for(i=0;i<this.seatsCount;i++){
-			if(this.players[i]){
-				this.addCardsToPlayer(this.players[i],5);
-				team = (team===0 ? 1 : 0);
-				this.teams[i] = team;
-				if(this.currSeat===-1){
-					this.currSeat=i;
+		for(j=0;j<5;j++){
+			for(i=0;i<this.seatsCount;i++){
+				if(this.players[i]){
+					this.addCardsToPlayer(this.players[i],1);
+					if(j===0){
+						team = (team===0 ? 1 : 0);
+						this.teams[i] = team;
+						if(this.currSeat===-1){
+							this.currSeat=i;
+						}
+					}
 				}
 			}
 		}
@@ -301,7 +306,7 @@ Game.prototype = {
 		var request_type = this.waitingPlay.request;
 		var waiting_seat = this.waitingPlay.seat;
 		var waiting_cause = this.waitingPlay.cause;
-		var err_invalid = 'invalid';
+		var err_invalid = Game.ERR_INVALID;
 		var needFillCards = false; //是否需要补牌
 		//此时的currSeat应该是等于waiting_seat的
 		var player_seat = this.getPlayerSeat(player);
@@ -309,12 +314,10 @@ Game.prototype = {
 			console.log('---- 无效的出牌：#%d无出牌权 ----', card_seat);
 			return err_invalid;
 		}
-		var play_seat=data.seat;
-		if(play_seat === undefined){
-			play_seat = player_seat;
-		}
+		var play_seat = player_seat;
 		var player_id = player.id;
 		var play_id = play_seat === player_seat ? player_id : this.players[play_seat].id;
+		var cp=this.inhandCards[player_id][data.card].point;
 
 		if(request_type === 'selfcard'){
 			if(play_seat !== player_seat){
@@ -381,6 +384,7 @@ Game.prototype = {
 			this.waitingPlay.request = 'selfcard';
 		}
 		if(needFillCards){
+			var mycards = this.inhandCards[player_id]
 			var needCount = 5 - mycards.length;
 			if(needCount > 0){
 				this.addCardsToPlayer(player,needCount);
@@ -390,6 +394,7 @@ Game.prototype = {
 		if(this.waitingPlay.request !== 'selfcard'){
 			return;
 		}
+		var flag = data.flag; //// TODO...
 		var nextSeat = cp=='A' ? flag : this.getNextSeat();
 		if(nextSeat === null){
 			//只有偷牌之后，才可能走到这个分支
@@ -428,10 +433,10 @@ Game.prototype = {
 				console.log('---- 无效：超出分数，请换一张 ----');
 				//玩家出这个牌是无效的，玩家应该改出其他牌
 				//玩家必有不死的牌出，因为必死的玩家将在上一步就被自动处理了
-				return 'invalid';
+				return Game.ERR_INVALID;
 			}
 		}
-		card = mycards.splice(card,1)[0];
+		card = mycards.splice(play_card,1)[0];
 		this.outhandCards.push(card);
 
 		this.playStack.length = 0;

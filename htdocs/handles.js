@@ -80,7 +80,7 @@ turn : function (data){
 	//}
 },
 play : function (data){
-	if(data.result = 'invalid'){
+	if(data.result === 'invalid'){
 		ui.alert('出牌无效');
 	}
 },
