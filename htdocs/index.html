@@ -6,7 +6,13 @@
 <style type="text/css">
 #div_seats .sat.odd { background-color: #ffcc00; padding: auto 10px; color: #ff0000; }
 #div_seats .sat.even { background-color: #ccff99; padding: auto 10px; color: #009900; }
+#div_seats .sat.ready { border-color: #0000ff; font-weight: bold; }
 #logs {font-size: 9pt;}
+#logs .alert {color: red;}
+div.m {width: 600px; position: relative;}
+div.ml {width: 120px; float: left;}
+div.mr {width: 480px; float: left;}
+.clr {clear:both;}
 </style>
 </head>
 
@@ -16,29 +22,30 @@ My Name: <input type="text" id="txtMyName">
 <span id="state">Not Connected.</span>
 
 <br>
-<table>
-	<tr>
-		<td valign="top">
-players:
-<div id="div_players">
+
+<div id="ml" class="ml">
+	players:
+	<div id="div_players">
+	</div>
 </div>
-		</td>
-		<td valign="top">
-<div style="margin-left:40px;">
-player cards:
-<div id="div_playercards">
+<div id="mr" class="mr">
+	player cards:
+	<div id="div_playercards">
+	</div>
+	outhand cards:
+	<div id="div_outhandcards">
+	</div>
+	current score:
+	<span id="span_score">0</span>
 </div>
-outhand cards:
-<div id="div_outhandcards">
-</div>
-		</td>
-	</tr>
-</table>
+<div class="clr"></div>
 
 <br>
 seats:
 <div id="div_seats">
 </div>
+
+<input type="button" value="Ready" id="btnReady" style="display:none" />
 
 <div id="chats">
 Chat:
@@ -54,263 +61,10 @@ logs:
 </div>
 
 <script src="lib/socket.io/socket.io.js"></script>
-<script src="ninety-nine.js"></script>
-
-<script type="text/javascript">
-function $(id){return document.getElementById(id);}
-
-var state = $('state'),
-	btnSwitchConn = $('btnSwitchConn'),
-	textChat = $('textChat'),
-	btnChat = $('btnChat'),
-	chatItems = $('chatItems'),
-	logs = $('logs');
-var div_players = $('div_players'),
-	txtMyName = $('txtMyName');
-var strMyName;
-var tableId = null;
-var players = [];
-var myuserId = null;
-
-if (window.MozWebSocket) {
-  window.WebSocket = window.MozWebSocket;
-}
-
-var socket=null;
-var socket_config = {
-	'reconnect': false,
-	'auto connect': true
-};
-
-function log(html){
-	var tmp = document.createElement('div');
-	tmp.innerHTML = html;
-	logs.appendChild(tmp);
-}
-socket_onopen = function () {
-	console.log('onopen : '+socket.socket.sessionid); //socket.id is undefined now
-	myuserId = socket.socket.sessionid;
-	ui.updateConnState(true);
-	ui.createSeats(8);
-	actions.login();
-};
-socket_onmessage = function (e) {
-	//console.log('onmessage :');
-	//console.dir(e);
-	if(e.op in handlers){
-		console.log(e.op);
-		console.dir(e.data);
-		handlers[e.op](e.data);
-	}
-};
-socket_onerror = function (e) {
-	console.log('onerror :');
-	console.dir(e);
-};
-socket_onclose = function () {
-	console.log('onclose .');
-	//socket = null;
-	players.length = 0;
-	ui.clearPlayers();
-	ui.clearSeats();
-	ui.updateConnState(false);
-};
-var actions = {
-	connect : function (){
-		if(socket && socket.socket.connected){
-			console.log('socket is already connected');
-			return;
-		}
-		strMyName = ui.getMyName();
-		if(!strMyName){
-			ui.alert('please input player name');
-			console.log('socket not connect. require name.');
-			return;
-		}
-		if(socket){
-			socket.socket.reconnect();
-			console.log('reconnect');
-		}else{
-			socket = io.connect('ws://'+location.host+'/99points', socket_config);
-			socket.on('connect', socket_onopen);
-			socket.on('message', socket_onmessage);
-			socket.on('error', socket_onerror);
-			socket.on('disconnect', socket_onclose);
-			console.log('new connect');
-		}
-	},
-	switchConn : function (){
-		if(socket){
-			//var websocket = socket.socket.transport.websocket;
-			if(socket.socket.connected){
-				console.log('close...');
-				socket.socket.disconnect();
-			}
-			else if(socket.socket.connecting){
-				console.log('CONNECTING...');
-			}
-			else if(!socket.socket.connected){
-				console.log('connect (1)...');
-				actions.connect();
-			}
-		}else{
-			console.log('connect (2)...');
-			actions.connect();
-		}
-	},
-	login : function (){
-		socket.emit('message', {op:'login', data:strMyName});
-	},
-	play : function (){
-	},
-	sitdown : function (e){
-		var i=ui.getSeatFromEvent(e);
-		if(i===null)return;
-		socket.emit('message', {op:'sitdown', data:{seat:+i}});
-	},
-	playerJoin : function (){
-	},
-	playerLeave : function (){
-	},
-	chat : function (){
-		var v=ui.getChatMessage();
-		if(v){
-			socket.emit('message', {op:'chat', data:{msg:v}});
-		}
-		else{
-			alert('please input message');
-		}
-	},
-	start : function (){
-	}
-};
-var handlers = {
-	welcome : function (data){
-		log(data);
-	},
-	getTables : function (data){
-	},
-	getPlayers : function (data){
-		players = data;
-		ui.updatePlayers(data);
-	},
-	playerJoin : function (data){
-		console.log('new user '+data.user.name+' join');
-		players.push(data.user);
-		ui.updatePlayers([data.user]);
-	},
-	playerLeave : function (data){
-		for(var i=0,n=players.length;i<n;i++){
-			var user = players[i];
-			if(user.id == data.user.id){
-				players.splice(i,1);
-				break;
-			}
-		}
-		ui.removePlayer(data.user);
-		console.log('user '+data.user.name+' leave');
-	},
-	sitdown : function (data){
-		if(data.seatOld !== undefined){
-			ui.updateSeat(data.seatOld, 'sit down', false);
-		}
-		ui.updateSeat(data.seat, data.user.name, true);
-	},
-	chat : function (data){
-		ui.chat(data);
-	},
-	play : function (data){
-	}
-};
-var ui = {
-	alert : function (s){
-		alert(s);
-	},
-	getMyName : function (e){
-		return txtMyName.value;
-	},
-	getChatMessage : function (e){
-		return textChat.value;
-	},
-	getSeatFromEvent : function (e){
-		return e.target.getAttribute('i');
-	},
-	clearPlayers : function (data){
-		div_players.innerHTML = '';
-	},
-	updatePlayers : function (data){
-		for(var i=0,n=data.length;i<n;i++){
-			var user = data[i];
-			if(user==null){
-				console.warn('updatePlayers :: invalid user data');
-				break;
-			}
-			if(!$('player_'+user.id)){
-				var tmp = document.createElement('div');
-				tmp.id = 'player_'+user.id;
-				tmp.innerHTML = user.name;
-				div_players.appendChild(tmp);
-				if(user.seat !== undefined){
-					ui.updateSeat(user.seat, user.name, true);
-				}
-			}
-		}
-	},
-	removePlayer : function (user){
-		div_players.removeChild($('player_'+user.id));
-		if(user.seat !== undefined){
-			ui.updateSeat(user.seat, 'sit down', false);
-		}
-	},
-	clearSeats : function (){
-		$('div_seats').innerHTML = '';
-	},
-	createSeats : function (n){
-		for(var i=0,s=[];i<n;i++){
-			s.push('<input type="button" i="'+i+'" id="seat'+i+'" value="'+i+'# sit down" class="'+(i%2 ? 'odd':'even')+'"> ');
-		}
-		$('div_seats').innerHTML = s.join(' ');
-	},
-	updateSeat : function (seat, name, sat){
-		var ele=$('seat'+seat);
-		ele.value = seat+'# '+name;
-		ele.className = (sat?'sat ':'')+(seat%2 ? 'odd':'even');
-		ele.disabled = sat;
-	},
-	chat : function (data){
-		appendHTML($('chatItems'), '<div>* '+data.user.name+': '+data.msg+'</div>');
-	},
-	updateConnState : function (state){
-		state.innerHTML=state?'Connected.':'Not Connected.';
-		btnSwitchConn.value=state?'Disconnect':'Connect';
-		btnChat.disabled=!state;
-	}
-};
-function appendHTML(target,html){
-	target.insertAdjacentHTML('BeforeEnd',html);
-	//var f = window.frg || (window.frg=document.createDocumentFragment());
-	//if(!frg.firstChild){
-		//frg.appendChild(document.createElement('div'));
-	//}
-	//frg.firstChild.innerHTML = html;
-	//target.appendChild(frg);
-}
-
-btnSwitchConn.onclick = actions.switchConn;
-btnChat.onclick = actions.chat;
-$('div_seats').onclick = actions.sitdown;
-$('txtMyName').onkeypress = function (e){
-	if(e.which==13){
-		actions.switchConn();
-	}
-};
-$('textChat').onkeypress = function (e){
-	if(e.which==13 && !btnChat.disabled){
-		actions.chat();
-	}
-};
-
-</script>
+<script src="actions.js"></script>
+<script src="handles.js"></script>
+<script src="ui.js"></script>
+<script src="ninety-nine-client.js"></script>
 
 </body>
 </html>

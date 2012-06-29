@@ -2327,6 +2327,10 @@
     };
     this.websocket.onmessage = function (ev) {
       self.onData(ev.data);
+	  if(ev.data.length > 3){
+	  console.log('----- websocket.onmessage : -----');
+	  console.log(ev.data);
+	  }
     };
     this.websocket.onclose = function () {
       self.onClose();
