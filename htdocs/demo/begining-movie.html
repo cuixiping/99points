@@ -1,0 +1,424 @@
+<!doctype>
+<html>
+	<head>
+		<title>Test Picture moves</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		html,body,h1,h2,h3,h4,h5,h6,hr,p,blockquote,dl,dt,dd,ul,ol,li,pre,form,fieldset,legend,button,input,textarea,th,td{margin:0;padding:0;}
+		body,button,input,select,textarea{font:12px/1.5 tahoma,arial,\5b8b\4f53;}
+		html{overflow-y:scroll;}
+		h1,h2,h3,h4,h5,h6{font-size:100%;}
+		address,cite,dfn,em,var{font-style:normal;}
+		code,kbd,pre,samp{font-family:courier new,courier,monospace;}
+		small{font-size:12px;}
+		button{cursor:pointer;}
+		ul,ol{list-style:none;}
+		a{text-decoration:none;color:#006699;}
+		a:hover{text-decoration:underline;}
+		sup{vertical-align:text-top;}
+		sub{vertical-align:text-bottom;}
+		legend{color:#000;}
+		fieldset,img{border:0;}
+		button,input,select,textarea{font-size:100%;}
+		table{border-collapse:collapse;border-spacing:0;}
+		
+		#page,#header,#content,#footer{margin-left:auto;margin-right:auto;clear:both;}
+		
+		.float-left{float:left;}
+		.float-right{float:right;}
+		.clear-fixed{clear:both;}
+		.clear-left{clear:left;}
+		.clear-right{clear:right;}
+		
+		.hide{display:none;}
+		.show{display:block;}
+		.inline{display:inline;}
+		.inline-block{display:inline-block;}
+		
+		.overflow-hide{overflow:hidden;}
+		.overflow-auto{overflow:auto;}
+		.overflow-scroll{overflow:scroll;}
+		.overflow-x-hide{overflow-x:hidden;}
+		.overflow-x-auto{overflow-x:auto;}
+		.overflow-x-scroll{overflow-x:scroll;}
+		.overflow-y-hide{overflow-y:hidden;}
+		.overflow-y-auto{overflow-y:auto;}
+		.overflow-y-scroll{overflow-y:scroll;}
+		
+		.visible-hide{visibility:hidden;}
+		.visible-show{visibility:visible;}
+		
+		.absolute{position:absolute;}
+		.fixed{position:fixed;}
+		.relative{position:relative;}
+		
+		.center{margin-left:auto;margin-right:auto;}
+		.txt-r{text-align:right;}
+		.txt-l{text-align:left;}
+		.txt-c{text-align:center;}
+		
+		
+		.w960{width:960px;}
+		.w800{width:800px;}
+		.w700{width:700px;}
+		.w650{width:650px;}
+		.w520{width:520px;}
+		.w120{width:120px;}
+		.w150{width:150px;}
+		.w180{width:180px;}	
+		
+		.canvas{background:url(../images/bg-desktop.png) no-repeat;}
+		</style>
+		<script src="lib/poker.min.js"></script>
+		<script type="text/javascript">
+		var Timer = {
+			addFn : function(name, fn, frames, idx){
+				var P = this, arr = P.fnList,
+					isEmpty = arr.length == 0,
+					find,
+					i,
+					len;
+				function _push(){
+					arr.push({
+						name : name,
+						idx : idx || 0,
+						fn : fn,
+						time : 0,
+						frames : frames
+					});
+				}
+				if(isEmpty){
+					_push();
+				}else{
+					find = false;
+					i = -1;
+					len = arr.length - 1;
+					for(;i ++ < len;){
+						if(arr[i].name == name){
+							find = true;
+							break;
+						}
+					}
+					if(!find){
+						_push();
+					}
+				}
+				if(idx){
+					arr.sort(function(a, b){
+						a.time = b.time = 0;
+						return a.idx - b.idx;
+					});
+					console.log(arr)
+				}
+			},
+			delFn : function(name){
+				var i = -1,
+					arr = this.fnList,
+					len = arr.length - 1;
+				for(;i++ < len;){
+					if(arr[i].name == name){
+						arr.splice(i,1);
+						break;
+					}
+				}
+			},
+			_hadInit : false,
+			init : function(){
+				var P = this,
+					arr, rec;
+				if(P._hadInit){
+					return;
+				}
+				P._hadInit = true;
+				P.stop = false;
+				P.del = false;
+				P.fnList = [];
+				arr = P.fnList;
+				function work(){
+					var i = -1, len = arr.length - 1;
+					if(len == -1){
+						return;
+					}
+					for(;i++ < len;){
+						var he = arr[i];
+						if(he && he.fn){
+							he.time++;
+							he.time == he.frames && (he.time = 0, he.fn());
+						}
+					}
+				}
+				rec = setInterval(function(){
+					if(P.stop) return;
+					if(P.del) clearInterval(rec);
+					work();
+				},10);
+			}
+		};	
+		</script>
+		<script type="text/javascript" src="lib/jquery.min.js" ></script>
+	</head>
+	<body>
+		<div id="page">
+			<div id="header" class="w960 center">&nbsp;</div>
+			<div id="content" class="w960 center">
+				<div style="border:1px red solid;text-align:center;" class="w800 center">
+					<canvas id="canvas" class="center canvas" width="800" height="480" >
+						didn't supports canvas
+					</canvas>
+				</div>	
+			</div>
+			<div id="footer" class="w960 center">&nbsp;</div>
+		</div>
+		<script type="text/javascript">
+		(function(){
+			var canvas = $('#canvas')[0],
+				ctx = canvas.getContext('2d'),
+				W = canvas.width,
+				H = canvas.height,
+				timer = Timer,
+				m = Math, pi = m.PI;
+			if(!ctx){
+				return;
+			}
+			
+			function objMove(a, doing, callback, speed){
+				var sTime = +new Date(), p, speed = speed || 300;
+				function c(m0, m1, p){
+					return m0 + (m1 - m0) * ((-Math.cos(p * Math.PI) / 2) + 0.5);
+				}
+				return function(){
+					p = (+new Date() - sTime) / speed;
+					var _a = [], i, len;
+					if(p >= 1){
+						for(var i = -1, len = a.length - 1; i++ < len;){
+							_a.push(a[i][1]);
+						}
+						callback(_a);
+						return _a;
+					}
+					for(i = -1, len = a.length - 1; i++ < len;){
+						_a.push(c(a[i][0],a[i][1],p));
+					}
+					doing && doing(_a);
+					return _a;
+				};
+			}
+			
+			timer.init();
+			
+			var suits = ['hearts', 'diamonds', 'spades', 'clubs'], 
+				points = ['a', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'j', 'q', 'k'],
+				cs = [],
+				doc = document,
+				pw = 30,
+				ph = 40;
+			/*	
+			for(var i = 0, nLenI = suits.length; i < nLenI; i++){
+				for(var j = 0, nLenJ = points.length; j < nLenJ; j++){
+					var canvas = doc.createElement('canvas');
+					canvas.width = pw;
+					canvas.height = ph;
+					canvas.getContext('2d').drawPokerCard(0, 0, h, suits[i], points[j]);
+					ctx.drawPokerCard(j * pw, i * ph, ph, suits[i], points[j]);
+					cs.push(canvas);
+				}
+			}	
+			*/
+			~function begining(){
+				var arr = [], end = false;	
+				function adds(opt){
+					arr.push(opt);
+					arr.sort(function(a, b){
+						return a.idx - b.idx;
+					});
+				}
+				function noSend(){
+					var cl = (800 - pw) / 2 - 40,
+						ct = (480 - ph) / 2,
+						i = 0,
+						len = 5;
+					for(; i  < len; i++){
+						ctx.drawPokerBack(cl, ct - i , ph, '#535550', '#90928C');
+					}
+				}
+				function drawDeskTop(){
+					ctx.clearRect(0, 0, W, H);
+					ctx.strokeStyle = 'rgb(0, 255, 255)';
+			        ctx.beginPath();
+			        ctx.arc((800 - pw) / 2, (480 - ph) / 2 + 310, 220, 0, pi*2, true);
+			        ctx.stroke();
+				}
+				function sendP(x, y){
+					var cl = x,
+						ct = y,
+						_a = 0,
+						_dec = _a * pi / 180,
+						i = 5;
+					while(_a != 50){
+						ctx.save();
+						ctx.translate(cl, ct);
+						ctx.rotate(_dec);
+						ctx.drawPokerBack(0, 0 , ph, '#535550', '#90928C');
+						ctx.restore();
+						cl += 10;
+						_a += 10;
+						_dec = _a * pi / 180;
+					}	
+				}
+				drawDeskTop();
+				sendP(120, (480 - ph) / 2 + 60);
+				sendP(150, 200);
+				noSend();
+				
+				arr.push({
+					fn : drawDeskTop,
+					idx : 0
+				});
+				arr.push({
+					fn : noSend,
+					idx : 1
+				});
+				arr.push({
+					fn : sendP,
+					idx : 1
+				});
+				setTimeout(function(){
+					return;
+					timer.addFn('m-begin', function(){
+						var i = -1, len = arr.length - 1;
+						for(; i++ < len;){
+							arr[i] && arr[i].fn && arr[i].fn();
+						}
+						if(end){
+							timer.delFn('m-begin');
+						}
+					}, 4);
+				}, 1000);
+			}();
+			
+			
+			
+			
+			
+			
+			
+			return 
+			//以下是测试用具.
+			var img = new Image(),
+				n = 0, r;
+			img.src = 'http://127.0.0.1/newbusuzi/resources/images/avatar.jpg';
+			timer.init();
+			var f = false;
+			img.onload = function(){
+				var A = objMove([[0, -30], [400, 100], [100, 300]], function(){
+					f = true;
+				}, function(){
+				}, 1200), A1 = objMove([[0, -20], [400, 200], [100, 200]], function(){
+					f = false;
+				}, function(){
+				}, 1200);
+				var Arr = [];
+				function adds(opt){
+					Arr.push(opt);
+					Arr.sort(function(a, b){
+						return a.idx - b.idx;
+					});
+				}
+				timer.addFn('ddd', function(){
+					var i = -1, len = Arr.length - 1;
+					for(; i++ < len;){
+						Arr[i] && Arr[i].fn && Arr[i].fn();
+					}
+				}, 3);
+				adds({
+					fn : function(){
+						ctx.clearRect(0, 0, 800, 480);
+					},
+					idx : 0
+				});
+				adds({
+					fn : function(){
+						var a = A();
+						var _dec = a[0] * pi / 180;
+						ctx.save();
+						ctx.fillStyle = 'pink';
+						ctx.translate(a[1], a[2]);
+						ctx.rotate(_dec);
+						ctx.fillRect(-25, -25, 50, 50);
+						ctx.restore();
+						ctx.fillStyle = 'red';
+						ctx.fillRect(100, 100, 50, 50);
+					},
+					idx : 1
+				});
+				setTimeout(function(){
+					adds({
+						fn : function(){
+							var a = A1();
+							var _dec = a[0] * pi / 180;
+							ctx.save();
+							ctx.fillStyle = 'pink';
+							ctx.translate(a[1], a[2]);
+							ctx.rotate(_dec);
+							ctx.fillRect(-25, -25, 50, 50);
+							ctx.restore();
+						},
+						idx : 2
+					});
+				}, 100);
+				
+				
+				setTimeout(function(){
+					var _ = objMove([[0, 20], [400, 400], [100, 300]], function(){
+								f = false;
+							}, function(){
+								timer.delFn('ddd');
+							}, 1200);
+					adds({
+						fn : function(){
+							var a = _();
+							var _dec = a[0] * pi / 180;
+							ctx.save();
+							ctx.fillStyle = 'pink';
+							ctx.translate(a[1], a[2]);
+							ctx.rotate(_dec);
+							ctx.fillRect(-25, -25, 50, 50);
+							ctx.restore();
+						},
+						idx : 2
+					});
+				}, 500);
+				
+				return;
+				timer.addFn('rotate', function(){
+					var a = A();
+					var _dec = a[0] * pi / 180;
+					ctx.save();
+					ctx.fillStyle = 'pink';
+					ctx.translate(a[1], a[2]);
+					ctx.rotate(_dec);
+					ctx.fillRect(-25, -25, 50, 50);
+					ctx.restore();
+					ctx.fillStyle = 'red';
+					ctx.fillRect(100, 100, 50, 50);
+				}, 3, 4);
+				setTimeout(function(){
+					timer.addFn('rotate-1', function(){
+						var a = A1();
+						var _dec = a[0] * pi / 180;
+						ctx.save();
+						ctx.fillStyle = 'pink';
+						ctx.translate(a[1], a[2]);
+						ctx.rotate(_dec);
+						ctx.fillRect(-25, -25, 50, 50);
+						ctx.restore();
+					}, 3, 2);
+				}, 10);
+				timer.addFn('rotate-2', function(){
+					!f && ctx.clearRect(0, 0, 800, 480);
+				}, 3, 5);
+			};
+		})();
+		</script>
+	</body>
+</html>
