@@ -155,7 +155,7 @@
 			}
 		};	
 		</script>
-		<script type="text/javascript" src="lib/jquery.min.js" ></script>
+		<script type="text/javascript" src="../lib/jquery.min.js" ></script>
 	</head>
 	<body>
 		<div id="page">
@@ -239,7 +239,7 @@
 						i = 0,
 						len = 5;
 					for(; i  < len; i++){
-						ctx.drawPokerBack(cl, ct - i , ph, '#535550', '#90928C');
+						ctx.drawPokerBack(cl - i, ct - i - 1 , ph, '#535550', '#90928C');
 					}
 				}
 				function drawDeskTop(){
@@ -297,7 +297,7 @@
 						arr.push({
 							fn : function(_i, _j){
 								var _this = a[_i][_j],
-									A = objMove([[cl, _this.l], [ct, _this.t], [0, _this.d]], null, _i === 9 && _j === 4 ? function(){
+									A = objMove([[cl, _this.l], [ct, _this.t], [0, _this.d]], null, _i === lenN - 1 && _j === a[0].length - 1 ? function(){
 										timer.delFn('begining-movie');
 										_end = true;
 									} : null, 500);
@@ -315,8 +315,8 @@
 						});
 						i++;
 						z++;
-						i % 10 === 0 && (j++, i = 0);
-						if(j > 4){
+						i % lenN === 0 && (j++, i = 0);
+						if(j > a[0].length - 1){
 							clearInterval(rec);
 						}
 					}, 150);
