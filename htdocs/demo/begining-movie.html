@@ -1,4 +1,4 @@
-<!doctype>
+﻿<!doctype>
 <html>
 	<head>
 		<title>Test Picture moves</title>
@@ -67,9 +67,9 @@
 		.w150{width:150px;}
 		.w180{width:180px;}	
 		
-		.canvas{background:url(../images/bg-desktop.png) no-repeat;}
+		.canvas{background:url(../../images/bg-desktop.png) no-repeat;}
 		</style>
-		<script src="lib/poker.min.js"></script>
+		<script src="../lib/poker.min.js"></script>
 		<script type="text/javascript">
 		var Timer = {
 			addFn : function(name, fn, frames, idx){
@@ -193,7 +193,7 @@
 						for(var i = -1, len = a.length - 1; i++ < len;){
 							_a.push(a[i][1]);
 						}
-						callback(_a);
+						callback && callback(_a);
 						return _a;
 					}
 					for(i = -1, len = a.length - 1; i++ < len;){
@@ -225,7 +225,8 @@
 			}	
 			*/
 			~function begining(){
-				var arr = [], end = false;	
+				var arr = [], end = false,
+					arrSites = [];	
 				function adds(opt){
 					arr.push(opt);
 					arr.sort(function(a, b){
@@ -233,8 +234,8 @@
 					});
 				}
 				function noSend(){
-					var cl = (800 - pw) / 2 - 40,
-						ct = (480 - ph) / 2,
+					var cl = (800 - pw) / 2 - 60,
+						ct = (480 - ph) / 2 + 10,
 						i = 0,
 						len = 5;
 					for(; i  < len; i++){
@@ -243,6 +244,7 @@
 				}
 				function drawDeskTop(){
 					ctx.clearRect(0, 0, W, H);
+					return;
 					ctx.strokeStyle = 'rgb(0, 255, 255)';
 			        ctx.beginPath();
 			        ctx.arc((800 - pw) / 2, (480 - ph) / 2 + 310, 220, 0, pi*2, true);
@@ -265,23 +267,109 @@
 						_dec = _a * pi / 180;
 					}	
 				}
-				drawDeskTop();
-				sendP(120, (480 - ph) / 2 + 60);
-				sendP(150, 200);
-				noSend();
+				function pushSiteDate(x, y){
+					var len = arrSites.length,
+						a = 0;
+					arrSites[len] = [];
+					while(a != 50){
+						arrSites[len].push({
+							l : x,
+							t : y,
+							d : a
+						});
+						a += 10;
+						x += 10;
+					}
+				}
+				
+				function beginToDraw(){
+					var i = 0,
+						j = 0,
+						z = 5,
+						a = arrSites,
+						lenN = a.length,
+						lenM = lenN * 5,
+						rec,
+						cl = (800 - pw) / 2 - 60,
+						ct = (480 - ph) / 2 + 5,
+						_end = false;
+					rec = setInterval(function(){
+						arr.push({
+							fn : function(_i, _j){
+								var _this = a[_i][_j],
+									A = objMove([[cl, _this.l], [ct, _this.t], [0, _this.d]], null, _i === 9 && _j === 4 ? function(){
+										timer.delFn('begining-movie');
+										_end = true;
+									} : null, 500);
+								return function(){
+									var _a = A(),
+										_dec = _a[2] * pi / 180;
+									ctx.save();
+									ctx.translate(_a[0], _a[1]);
+									ctx.rotate(_dec);
+									ctx.drawPokerBack(0, 0 , ph, '#535550', '#90928C');
+									ctx.restore();
+								};
+							}(i, j),
+							idx : z
+						});
+						i++;
+						z++;
+						i % 10 === 0 && (j++, i = 0);
+						if(j > 4){
+							clearInterval(rec);
+						}
+					}, 150);
+					timer.addFn('begining-movie', function(){
+						var i = -1, len = arr.length - 1;
+						for(; i++ < len;){
+							arr[i] && arr[i].fn && arr[i].fn();
+						}
+						if(_end){
+							timer.delFn('begining-movie');
+						}
+					}, 4);
+				}
+				
+				
+				//sendP(120, (480 - ph) / 2 + 60);
+				/*
+				sendP(205, 155);
+				sendP(375, 155);
+				sendP(555, 155);
+				sendP(635, 205);
+				sendP(635, 310);
+				sendP(555, 355);
+				sendP(375, 355);
+				sendP(205, 355);
+				sendP(135, 310);
+				sendP(135, 205);
+				*/
+				
+				pushSiteDate(205, 155);
+				pushSiteDate(375, 155);
+				pushSiteDate(555, 155);
+				pushSiteDate(635, 205);
+				pushSiteDate(635, 310);
+				pushSiteDate(555, 355);
+				pushSiteDate(375, 355);
+				pushSiteDate(205, 355);
+				pushSiteDate(135, 310);
+				pushSiteDate(135, 205);
+				//drawDeskTop();
+				//noSend();
 				
 				arr.push({
 					fn : drawDeskTop,
 					idx : 0
 				});
+				
 				arr.push({
 					fn : noSend,
 					idx : 1
 				});
-				arr.push({
-					fn : sendP,
-					idx : 1
-				});
+				beginToDraw();
+				return;
 				setTimeout(function(){
 					return;
 					timer.addFn('m-begin', function(){
