@@ -161,6 +161,15 @@
 		<div id="page">
 			<div id="header" class="w960 center">&nbsp;</div>
 			<div id="content" class="w960 center">
+				<div class="w800 center">
+					<input type="text" id="J-i" />
+					<input type="text" id="J-j" />
+					<input type="button" id="J-s" value=" 发牌 " />
+					<br />
+					输入第几组牌 (桌面上有几组) 
+					输入第几张牌 (0 ~ 4)
+					<br />
+				</div>
 				<div style="border:1px red solid;text-align:center;" class="w800 center">
 					<canvas id="canvas" class="center canvas" width="800" height="480" >
 						didn't supports canvas
@@ -224,23 +233,24 @@
 				}
 			}	
 			*/
+			
+			var arrSites = [];
+			function noSend(){
+				var cl = (800 - pw) / 2 - 60,
+					ct = (480 - ph) / 2 + 10,
+					i = 0,
+					len = 5;
+				for(; i  < len; i++){
+					ctx.drawPokerBack(cl - i, ct - i - 1 , ph, '#535550', '#90928C');
+				}
+			}
 			~function begining(){
-				var arr = [], end = false,
-					arrSites = [];	
+				var arr = [], end = false;
 				function adds(opt){
 					arr.push(opt);
 					arr.sort(function(a, b){
 						return a.idx - b.idx;
 					});
-				}
-				function noSend(){
-					var cl = (800 - pw) / 2 - 60,
-						ct = (480 - ph) / 2 + 10,
-						i = 0,
-						len = 5;
-					for(; i  < len; i++){
-						ctx.drawPokerBack(cl - i, ct - i - 1 , ph, '#535550', '#90928C');
-					}
 				}
 				function drawDeskTop(){
 					ctx.clearRect(0, 0, W, H);
@@ -269,16 +279,19 @@
 				}
 				function pushSiteDate(x, y){
 					var len = arrSites.length,
-						a = 0;
+						a = 0,
+						i = 0;
 					arrSites[len] = [];
 					while(a != 50){
 						arrSites[len].push({
 							l : x,
 							t : y,
-							d : a
+							d : a,
+							i : i
 						});
 						a += 10;
 						x += 10;
+						i++;
 					}
 				}
 				
@@ -319,14 +332,11 @@
 						if(j > a[0].length - 1){
 							clearInterval(rec);
 						}
-					}, 150);
+					}, 80);
 					timer.addFn('begining-movie', function(){
 						var i = -1, len = arr.length - 1;
 						for(; i++ < len;){
 							arr[i] && arr[i].fn && arr[i].fn();
-						}
-						if(_end){
-							timer.delFn('begining-movie');
 						}
 					}, 4);
 				}
@@ -348,10 +358,10 @@
 				
 				pushSiteDate(205, 155);
 				pushSiteDate(375, 155);
-				pushSiteDate(555, 155);
+				//pushSiteDate(555, 155);
 				pushSiteDate(635, 205);
 				pushSiteDate(635, 310);
-				pushSiteDate(555, 355);
+				//pushSiteDate(555, 355);
 				pushSiteDate(375, 355);
 				pushSiteDate(205, 355);
 				pushSiteDate(135, 310);
@@ -377,18 +387,92 @@
 						for(; i++ < len;){
 							arr[i] && arr[i].fn && arr[i].fn();
 						}
-						if(end){
-							timer.delFn('m-begin');
-						}
 					}, 4);
 				}, 1000);
 			}();
 			
 			
 			
+			~function getPocker(){
+				var I = $('#J-i'),
+					J = $('#J-j'),
+					S = $('#J-s'),
+					ok = false,
+					L = 240,
+					Pdesk = [];
+				//240, 305	
+				S.click(function(){
+					if(ok){
+						return;
+					}
+					ok = true;
+					timer.addFn('run-this', function(){
+						var _i = +I.val() || 0,
+							_j = +J.val() || 0,
+							that = arrSites[_i][_j],
+							i, j,
+							lenI = arrSites.length - 1,
+							lenJ = arrSites[0].length - 1,
+							A = objMove([[that.l, L], [that.t, 305]], null, function(){
+								Pdesk.push({
+									l : L,
+									t : 305
+								})
+								L += 30;
+								dk = true;
+							}, 300),
+							cl = (800 - pw) / 2 - 60,
+							ct = (480 - ph) / 2 + 5,
+							A1 = objMove([[cl, that.l], [ct, that.t], [0, that.d]], null, function(){
+								timer.delFn('run-this');
+								ok = false;
+							}, 1000),
+							dk = false;
+						return function(){
+							ctx.clearRect(0, 0, W, H);
+							noSend();
+							var lenPdesk = Pdesk.length - 1;
+							if(lenPdesk != -1){
+								for(i = -1; i++ < lenPdesk;){
+									var _a = Pdesk[i];
+									ctx.drawPokerBack(_a.l, _a.t , ph, suits[2], points[3]);
+								}
+							}
+							for(i = -1; i++ < lenI;){
+								for(j = -1; j++ < lenJ;){
+									var _a, _dec;
+									if(i === _i && j === _j){
+										if(!dk){
+											_a = A();
+											ctx.drawPokerBack(_a[0], _a[1] , ph, suits[2], points[3]);
+										}else{
+											_a = A1();
+											_dec = _a[2] * pi / 180;
+											ctx.save();
+											ctx.translate(_a[0], _a[1]);
+											ctx.rotate(_dec);
+											ctx.drawPokerBack(0, 0 , ph, '#535550', '#90928C');
+											ctx.restore();
+										}
+									}else{
+										_a = arrSites[i][j];
+										_dec = _a.d * pi / 180;
+										ctx.save();
+										ctx.translate(_a.l, _a.t);
+										ctx.rotate(_dec);
+										ctx.drawPokerBack(0, 0 , ph, '#535550', '#90928C');
+										ctx.restore();
+									}
+								}
+							}
+						};
+					}(), 4);
+				});
+			}();
 			
-			
-			
+			~function sendPocker(){
+				
+			}();
 			
 			return 
 			//以下是测试用具.
