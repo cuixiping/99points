@@ -234,7 +234,10 @@
 			}	
 			*/
 			
-			var arrSites = [];
+			var arrSites = [],
+				canvasdesk = document.createElement('canvas');
+			canvasdesk.width = W;
+			canvasdesk.height = H;
 			function noSend(){
 				var cl = (800 - pw) / 2 - 60,
 					ct = (480 - ph) / 2 + 10,
@@ -312,6 +315,7 @@
 								var _this = a[_i][_j],
 									A = objMove([[cl, _this.l], [ct, _this.t], [0, _this.d]], null, _i === lenN - 1 && _j === a[0].length - 1 ? function(){
 										timer.delFn('begining-movie');
+										canvasdesk.getContext('2d').drawImage(canvas, 0, 0, W, H);
 										_end = true;
 									} : null, 500);
 								return function(){
@@ -400,19 +404,51 @@
 					ok = false,
 					L = 240,
 					Pdesk = [];
+					
+				function clearPocker(){
+					var i = Pdesk.length - 1,
+						rec,
+						arr = [];
+					rec = setInterval(function(){
+						arr.push(function(i){
+							var A = objMove([[Pdesk[i].l, 240]], null, i === 1 ? function(){
+								timer.delFn('clearPocker-clear');
+								ok = false;
+							} : null, 500 - i * 50);
+							return function(){
+								var _a = A();
+								ctx.drawPokerBack(_a[0], 305 , ph, suits[2], points[3]);
+							};
+						}(i));
+						i--;
+						if(i < 1){
+							clearInterval(rec);
+						}
+					}, 120);
+					timer.addFn('clearPocker-clear', function(){
+						var i = -1,
+							len = arr.length - 1;
+						ctx.clearRect(0, 0, W, H);	
+						ctx.drawImage(canvasdesk, 0, 0, W, H);
+						for(; i++ < len;){
+							arr[i] && arr[i]();
+						}
+					}, 4);
+				}	
 				//240, 305	
 				S.click(function(){
 					if(ok){
 						return;
 					}
 					ok = true;
+					var _i = +I.val() || 0,
+						_j = +J.val() || 0;
 					timer.addFn('run-this', function(){
-						var _i = +I.val() || 0,
-							_j = +J.val() || 0,
-							that = arrSites[_i][_j],
+						var that = arrSites[_i][_j],
 							i, j,
 							lenI = arrSites.length - 1,
 							lenJ = arrSites[0].length - 1,
+							A1, A2,
 							A = objMove([[that.l, L], [that.t, 305]], null, function(){
 								Pdesk.push({
 									l : L,
@@ -420,13 +456,17 @@
 								})
 								L += 30;
 								dk = true;
+								A1 = objMove([[cl, that.l], [ct, that.t], [0, that.d]], null, function(){
+									timer.delFn('run-this');
+									if(Pdesk.length === arrSites.length){
+										clearPocker();
+									}else{
+										ok = false;
+									}
+								}, 400)
 							}, 300),
 							cl = (800 - pw) / 2 - 60,
 							ct = (480 - ph) / 2 + 5,
-							A1 = objMove([[cl, that.l], [ct, that.t], [0, that.d]], null, function(){
-								timer.delFn('run-this');
-								ok = false;
-							}, 1000),
 							dk = false;
 						return function(){
 							ctx.clearRect(0, 0, W, H);
