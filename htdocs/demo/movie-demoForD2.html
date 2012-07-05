@@ -1,0 +1,287 @@
+<!doctype>
+<html>
+	<head>
+		<title>movie-demo for D2 show time</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		html,body,h1,h2,h3,h4,h5,h6,hr,p,blockquote,dl,dt,dd,ul,ol,li,pre,form,fieldset,legend,button,input,textarea,th,td{margin:0;padding:0;}
+		body,button,input,select,textarea{font:12px/1.5 tahoma,arial,\5b8b\4f53;}
+		body{background:#3B3433;}
+		html{overflow-y:scroll;}
+		h1,h2,h3,h4,h5,h6{font-size:100%;}
+		address,cite,dfn,em,var{font-style:normal;}
+		code,kbd,pre,samp{font-family:courier new,courier,monospace;}
+		small{font-size:12px;}
+		button{cursor:pointer;}
+		ul,ol{list-style:none;}
+		a{text-decoration:none;color:#006699;}
+		a:hover{text-decoration:underline;}
+		sup{vertical-align:text-top;}
+		sub{vertical-align:text-bottom;}
+		legend{color:#000;}
+		fieldset,img{border:0;}
+		button,input,select,textarea{font-size:100%;}
+		table{border-collapse:collapse;border-spacing:0;}
+		
+		#page,#header,#content,#footer{margin-left:auto;margin-right:auto;clear:both;}
+		
+		.float-left{float:left;}
+		.float-right{float:right;}
+		.clear-fixed{clear:both;}
+		.clear-left{clear:left;}
+		.clear-right{clear:right;}
+		
+		.hide{display:none;}
+		.show{display:block;}
+		.inline{display:inline;}
+		.inline-block{display:inline-block;}
+		
+		.overflow-hide{overflow:hidden;}
+		.overflow-auto{overflow:auto;}
+		.overflow-scroll{overflow:scroll;}
+		.overflow-x-hide{overflow-x:hidden;}
+		.overflow-x-auto{overflow-x:auto;}
+		.overflow-x-scroll{overflow-x:scroll;}
+		.overflow-y-hide{overflow-y:hidden;}
+		.overflow-y-auto{overflow-y:auto;}
+		.overflow-y-scroll{overflow-y:scroll;}
+		
+		.visible-hide{visibility:hidden;}
+		.visible-show{visibility:visible;}
+		
+		.absolute{position:absolute;}
+		.fixed{position:fixed;}
+		.relative{position:relative;}
+		
+		.center{margin-left:auto;margin-right:auto;}
+		.txt-r{text-align:right;}
+		.txt-l{text-align:left;}
+		.txt-c{text-align:center;}
+		
+		.w1610{width:1610px;}
+		.w960{width:960px;}
+		.w800{width:800px;}
+		.w802{width:802px}
+		.w700{width:700px;}
+		.w650{width:650px;}
+		.w520{width:520px;}
+		.w120{width:120px;}
+		.w150{width:150px;}
+		.w180{width:180px;}	
+		
+		.canvas{border:1px #666 solid;background:url(../../images/99-desktop.png) no-repeat;}
+		.outer{border:1px #1F1F1F solid;}
+		.intr > div{padding:5px;font-size:14px;border:1px #666 solid;color:#fff;}
+		button{padding:3px 10px;margin:0 5px 10px 0;}
+		</style>
+		<script src="../lib/poker.min.js"></script>
+		<script type="text/javascript">
+		var Timer = {
+			addFn : function(name, fn, frames, idx){
+				var P = this, arr = P.fnList,
+					isEmpty = arr.length == 0,
+					find,
+					i,
+					len;
+				function _push(){
+					arr.push({
+						name : name,
+						idx : idx || 0,
+						fn : fn,
+						time : 0,
+						frames : frames
+					});
+				}
+				if(isEmpty){
+					_push();
+				}else{
+					find = false;
+					i = -1;
+					len = arr.length - 1;
+					for(;i ++ < len;){
+						if(arr[i].name == name){
+							find = true;
+							break;
+						}
+					}
+					if(!find){
+						_push();
+					}
+				}
+				if(idx){
+					arr.sort(function(a, b){
+						a.time = b.time = 0;
+						return a.idx - b.idx;
+					});
+					console.log(arr)
+				}
+			},
+			delFn : function(name){
+				var i = -1,
+					arr = this.fnList,
+					len = arr.length - 1;
+				for(;i++ < len;){
+					if(arr[i].name == name){
+						arr.splice(i,1);
+						break;
+					}
+				}
+			},
+			_hadInit : false,
+			init : function(){
+				var P = this,
+					arr, rec;
+				if(P._hadInit){
+					return;
+				}
+				P._hadInit = true;
+				P.stop = false;
+				P.del = false;
+				P.fnList = [];
+				arr = P.fnList;
+				function work(){
+					var i = -1, len = arr.length - 1;
+					if(len == -1){
+						return;
+					}
+					for(;i++ < len;){
+						var he = arr[i];
+						if(he && he.fn){
+							he.time++;
+							he.time == he.frames && (he.time = 0, he.fn());
+						}
+					}
+				}
+				rec = setInterval(function(){
+					if(P.stop) return;
+					if(P.del) clearInterval(rec);
+					work();
+				},10);
+			}
+		};	
+		</script>
+		<script type="text/javascript" src="../lib/jquery.min.js" ></script>
+	</head>
+	<body>
+		<div id="page">
+			<div id="header" class="w960 center">&nbsp;</div>
+			<div id="content" class="w1610 center">
+				<div class="w1610 center">
+					<button id="J-movieBegin">开始</button> &nbsp; 
+					<button id="J-moviePause" class="hide">暂停</button>
+				</div>
+				<div style="clear:both;margin:5px 0 10px 0;overflow:hidden;">
+					<div class="float-left w802 intr">
+						<div>
+							玩家 1 : hehe123
+						</div>	
+					</div>
+					<div class="float-right w802 intr">
+						<div>
+							玩家 2 : Igin
+						</div>	
+					</div>	
+				</div>
+				<div class="clear-fixed">
+					<div class="float-left w802 outer position-r">
+						<canvas id="canvas-self" class="center canvas" width="800" height="480" >
+							didn't supports canvas
+						</canvas>
+					</div>
+					<div class="float-right w802 outer position-r">
+						<canvas id="canvas-other" class="center canvas" width="800" height="480" >
+							didn't supports canvas
+						</canvas>
+					</div>	
+				</div>	
+			</div>
+			<div id="footer" class="w960 center">&nbsp;
+				<span class="inline-block visible-hide">&nbsp;</span>	
+			</div>
+		</div>
+		<script type="text/javascript">
+		(function(){
+			var canvasSelf = $('#canvas-self')[0],
+				canvasOther = $('#canvas-other')[0],
+				ctxSelf = canvasSelf.getContext('2d'),
+				ctxOther = canvasOther.getContext('2d'),
+				W = canvas.width,
+				H = canvas.height,
+				timer = Timer,
+				m = Math, pi = m.PI;
+			if(!ctx){
+				return;
+			}
+			
+			function objMove(a, doing, callback, speed){
+				var sTime = +new Date(), p, speed = speed || 300;
+				function c(m0, m1, p){
+					return m0 + (m1 - m0) * ((-Math.cos(p * Math.PI) / 2) + 0.5);
+				}
+				return function(){
+					p = (+new Date() - sTime) / speed;
+					var _a = [], i, len;
+					if(p >= 1){
+						for(var i = -1, len = a.length - 1; i++ < len;){
+							_a.push(a[i][1]);
+						}
+						callback && callback(_a);
+						return _a;
+					}
+					for(i = -1, len = a.length - 1; i++ < len;){
+						_a.push(c(a[i][0],a[i][1],p));
+					}
+					doing && doing(_a);
+					return _a;
+				};
+			}
+			
+			timer.init();
+			
+			var suits = ['hearts', 'diamonds', 'spades', 'clubs'], 
+				points = ['a', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'j', 'q', 'k'],
+				cs = [],
+				doc = document,
+				pw = 30,
+				ph = 40;
+			
+			var arrSites = [],
+				canvasdeskSelf = doc.createElement('canvas'),
+				canvasdeskOther = doc.createElement('canvas');
+			canvasdeskSelf.width = canvasdeskOther.width = W;
+			canvasdeskSelf.height = canvasdeskOther.height = H;
+			
+			var players = [
+				'xiaole',
+				'hehe123',
+				'igin',
+				'zhongjun',
+				'jianye',
+				'jianchun',
+				'arlen',
+				'charlie',
+				'spark',
+				'othella'
+			], player_0 = 'hehe123', player_1 = 'igin';
+			
+			function copyDesktop(model, copyFrom){
+				model.getContext('2d').drawImage(copyFrom, 0, 0, W, H);
+			}
+			
+			function titleTips(l, t, co){
+				
+			}
+			
+			function peopleSit(){
+				
+			}
+			
+			function selfSit(){
+				
+			}
+			
+			
+		})();
+		</script>
+	</body>
+</html>
