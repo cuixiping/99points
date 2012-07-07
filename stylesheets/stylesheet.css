@@ -329,6 +329,7 @@ Full-Width Styles
   right: 0;
   height: 70px;
   background: url('../images/icon_download.png') no-repeat 0% 90%;
+  display: none; /* temporarily hide downloads */
 }
 
 .zip_download_link {
