@@ -1,0 +1,695 @@
+﻿<!doctype>
+<html>
+	<head>
+		<title>Test Picture moves</title>
+		<meta charset="utf-8" />
+		<style type="text/css">
+		html,body,h1,h2,h3,h4,h5,h6,hr,p,blockquote,dl,dt,dd,ul,ol,li,pre,form,fieldset,legend,button,input,textarea,th,td{margin:0;padding:0;}
+		body,button,input,select,textarea{font:12px/1.5 tahoma,arial,\5b8b\4f53;}
+		body{background:#3B3433;}
+		html{overflow-y:scroll;}
+		h1,h2,h3,h4,h5,h6{font-size:100%;}
+		address,cite,dfn,em,var{font-style:normal;}
+		code,kbd,pre,samp{font-family:courier new,courier,monospace;}
+		small{font-size:12px;}
+		button{cursor:pointer;}
+		ul,ol{list-style:none;}
+		a{text-decoration:none;color:#006699;}
+		a:hover{text-decoration:underline;}
+		sup{vertical-align:text-top;}
+		sub{vertical-align:text-bottom;}
+		legend{color:#000;}
+		fieldset,img{border:0;}
+		button,input,select,textarea{font-size:100%;}
+		table{border-collapse:collapse;border-spacing:0;}
+		
+		#page,#header,#content,#footer{margin-left:auto;margin-right:auto;clear:both;}
+		
+		.float-left{float:left;}
+		.float-right{float:right;}
+		.clear-fixed{clear:both;}
+		.clear-left{clear:left;}
+		.clear-right{clear:right;}
+		
+		.hide{display:none;}
+		.show{display:block;}
+		.inline{display:inline;}
+		.inline-block{display:inline-block;}
+		
+		.overflow-hide{overflow:hidden;}
+		.overflow-auto{overflow:auto;}
+		.overflow-scroll{overflow:scroll;}
+		.overflow-x-hide{overflow-x:hidden;}
+		.overflow-x-auto{overflow-x:auto;}
+		.overflow-x-scroll{overflow-x:scroll;}
+		.overflow-y-hide{overflow-y:hidden;}
+		.overflow-y-auto{overflow-y:auto;}
+		.overflow-y-scroll{overflow-y:scroll;}
+		
+		.visible-hide{visibility:hidden;}
+		.visible-show{visibility:visible;}
+		
+		.absolute{position:absolute;}
+		.fixed{position:fixed;}
+		.relative{position:relative;}
+		
+		.center{margin-left:auto;margin-right:auto;}
+		.txt-r{text-align:right;}
+		.txt-l{text-align:left;}
+		.txt-c{text-align:center;}
+		
+		
+		.w960{width:960px;}
+		.w800{width:800px;}
+		.w700{width:700px;}
+		.w650{width:650px;}
+		.w520{width:520px;}
+		.w120{width:120px;}
+		.w150{width:150px;}
+		.w180{width:180px;}	
+		
+		.w1610{width:1610px;}
+		.w960{width:960px;}
+		.w800{width:800px;}
+		.w802{width:802px}
+		.w700{width:700px;}
+		.w650{width:650px;}
+		.w520{width:520px;}
+		.w120{width:120px;}
+		.w150{width:150px;}
+		.w180{width:180px;}	
+		
+		.canvas{border:1px #666 solid;background:url(../../images/99-desktop.png) no-repeat;}
+		.outer{border:1px #1F1F1F solid;}
+		.intr > div{padding:5px;font-size:14px;border:1px #666 solid;color:#fff;}
+		button{padding:3px 10px;margin:0 5px 10px 0;}
+		</style>
+		<script src="../lib/poker.min.js"></script>
+		<script type="text/javascript">
+		var Timer = {
+			addFn : function(name, fn, frames, idx){
+				var P = this, arr = P.fnList,
+					isEmpty = arr.length == 0,
+					find,
+					i,
+					len;
+				function _push(){
+					arr.push({
+						name : name,
+						idx : idx || 0,
+						fn : fn,
+						time : 0,
+						frames : frames
+					});
+				}
+				if(isEmpty){
+					_push();
+				}else{
+					find = false;
+					i = -1;
+					len = arr.length - 1;
+					for(;i ++ < len;){
+						if(arr[i].name == name){
+							find = true;
+							break;
+						}
+					}
+					if(!find){
+						_push();
+					}
+				}
+				if(idx){
+					arr.sort(function(a, b){
+						a.time = b.time = 0;
+						return a.idx - b.idx;
+					});
+					console.log(arr)
+				}
+			},
+			delFn : function(name){
+				var i = -1,
+					arr = this.fnList,
+					len = arr.length - 1;
+				for(;i++ < len;){
+					if(arr[i].name == name){
+						arr.splice(i,1);
+						break;
+					}
+				}
+			},
+			_hadInit : false,
+			init : function(){
+				var P = this,
+					arr, rec;
+				if(P._hadInit){
+					return;
+				}
+				P._hadInit = true;
+				P.stop = false;
+				P.del = false;
+				P.fnList = [];
+				arr = P.fnList;
+				function work(){
+					var i = -1, len = arr.length - 1;
+					if(len == -1){
+						return;
+					}
+					for(;i++ < len;){
+						var he = arr[i];
+						if(he && he.fn){
+							he.time++;
+							he.time == he.frames && (he.time = 0, he.fn());
+						}
+					}
+				}
+				rec = setInterval(function(){
+					if(P.stop) return;
+					if(P.del) clearInterval(rec);
+					work();
+				},10);
+			}
+		};	
+		</script>
+		<script type="text/javascript" src="../lib/jquery.min.js" ></script>
+	</head>
+	<body>
+		<div id="page">
+			<div id="header" class="w960 center">&nbsp;</div>
+			<div id="content" class="w960 center">
+				<div class="w800 center">
+					<input type="text" id="J-i" />
+					<input type="text" id="J-j" />
+					<input type="button" id="J-s" value=" 发牌 " />
+					<br />
+					输入第几组牌 (桌面上有几组) 
+					输入第几张牌 (0 ~ 4)
+					<br />
+				</div>
+				<div class="clear-fixed">
+					<div class="float-left w802 outer position-r">
+						<canvas id="canvas" class="center canvas" width="800" height="480" >
+							didn't supports canvas
+						</canvas>
+					</div>
+				</div>		
+			</div>
+			<div id="footer" class="w960 center">&nbsp;</div>
+		</div>
+		<script type="text/javascript">
+		(function(){
+			var canvas = $('#canvas')[0],
+				ctx = canvas.getContext('2d'),
+				W = canvas.width,
+				H = canvas.height,
+				timer = Timer,
+				m = Math, pi = m.PI;
+			if(!ctx){
+				return;
+			}
+			
+			function objMove(a, doing, callback, speed){
+				var sTime = +new Date(), p, speed = speed || 300;
+				function c(m0, m1, p){
+					return m0 + (m1 - m0) * ((-Math.cos(p * Math.PI) / 2) + 0.5);
+				}
+				return function(){
+					p = (+new Date() - sTime) / speed;
+					var _a = [], i, len;
+					if(p >= 1){
+						for(var i = -1, len = a.length - 1; i++ < len;){
+							_a.push(a[i][1]);
+						}
+						callback && callback(_a);
+						return _a;
+					}
+					for(i = -1, len = a.length - 1; i++ < len;){
+						_a.push(c(a[i][0],a[i][1],p));
+					}
+					doing && doing(_a);
+					return _a;
+				};
+			}
+			
+			timer.init();
+			
+			var suits = ['hearts', 'diamonds', 'spades', 'clubs'], 
+				points = ['a', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'j', 'q', 'k'],
+				cs = [],
+				doc = document,
+				pw = 30,
+				ph = 40;
+			/*	
+			for(var i = 0, nLenI = suits.length; i < nLenI; i++){
+				for(var j = 0, nLenJ = points.length; j < nLenJ; j++){
+					var canvas = doc.createElement('canvas');
+					canvas.width = pw;
+					canvas.height = ph;
+					canvas.getContext('2d').drawPokerCard(0, 0, h, suits[i], points[j]);
+					ctx.drawPokerCard(j * pw, i * ph, ph, suits[i], points[j]);
+					cs.push(canvas);
+				}
+			}	
+			*/
+			
+			var arrSites = [],
+				canvasdesk = document.createElement('canvas'),
+				sys_player = ['hehe123', 'igin', 'xiaole', 'zhongjun', 'jianye', 'jianchun', 'arlen', 'charlie', 'spark', 'othella'], 
+				aPocker = [],
+				ran = m.random,
+				floor = m.floor,
+				pockerPoint = [(800 - pw) / 2 - 100, (480 - ph) / 2 + 10],
+				pockerZhi = [],
+				pockermap = {};
+			canvasdesk.width = W;
+			canvasdesk.height = H;
+			function noSend(){
+				var cl = (800 - pw) / 2 - 60,
+					ct = (480 - ph) / 2 + 10,
+					i = 0,
+					len = 5;
+				for(; i  < len; i++){
+					ctx.drawPokerBack(cl - i, ct - i - 1 , ph, '#535550', '#90928C');
+				}
+			}
+			
+			~function randomPockerFirst(){
+				var i = 0,
+					len = 200,
+					_arr = [],
+					_len;
+				for(i in pockermap){
+					if(i !== 'xb'){
+						_arr.push(i);
+					}
+				}
+				_len = _arr.length - 1;	
+				for(i = 0; i < len; i++){
+					pockerZhi.push(_arr[floor(ran() * _len)]);
+				}
+			}();
+			
+			~function begining(){
+				var arr = [], end = false;
+				function adds(opt){
+					arr.push(opt);
+					arr.sort(function(a, b){
+						return a.idx - b.idx;
+					});
+				}
+				function drawDeskTop(){
+					ctx.clearRect(0, 0, W, H);
+					return;
+					ctx.strokeStyle = 'rgb(0, 255, 255)';
+			        ctx.beginPath();
+			        ctx.arc((800 - pw) / 2, (480 - ph) / 2 + 310, 220, 0, pi*2, true);
+			        ctx.stroke();
+				}
+				function sendP(x, y){
+					var cl = x,
+						ct = y,
+						_a = 0,
+						_dec = _a * pi / 180,
+						i = 5;
+					while(_a != 50){
+						ctx.save();
+						ctx.translate(cl, ct);
+						ctx.rotate(_dec);
+						ctx.drawPokerBack(0, 0 , ph, '#535550', '#90928C');
+						ctx.restore();
+						cl += 10;
+						_a += 10;
+						_dec = _a * pi / 180;
+					}	
+				}
+				function pushSiteDate(x, y){
+					var len = arrSites.length,
+						a = 0,
+						i = 0;
+					arrSites[len] = [];
+					while(a != 50){
+						arrSites[len].push({
+							l : x,
+							t : y,
+							d : a,
+							i : i
+						});
+						a += 10;
+						x += 10;
+						i++;
+					}
+				}
+				
+				function beginToDraw(){
+					var i = 0,
+						j = 0,
+						z = 5,
+						a = arrSites,
+						lenN = a.length,
+						lenM = lenN * 5,
+						rec,
+						cl = (800 - pw) / 2 - 60,
+						ct = (480 - ph) / 2 + 5,
+						_end = false;
+					rec = setInterval(function(){
+						arr.push({
+							fn : function(_i, _j){
+								var _this = a[_i][_j],
+									isMy = _i == 0,
+									pockers = aPocker[_i * 10 + _j],
+									arrm =  isMy? [[pockerPoint[0], _this.l - 70 + j * 30], [pockerPoint[1] + 30, _this.t - 10], [pw, pw * 1.2], [ph, ph * 1.2]] : [[cl, _this.l], [ct, _this.t], [0, _this.d]],
+									A = objMove(arrm, null, _i === lenN - 1 && _j === a[0].length - 1 ? function(){
+										timer.delFn('begining-movie');
+										canvasdesk.getContext('2d').drawImage(canvas, 0, 0, W, H);
+										_end = true;
+									} : null, 500);
+								return function(){
+									var _a = A(),
+										_dec = _a[2] * pi / 180;
+									if(isMy){
+										ctx.drawImage(isMy ? pockermap['h4'] : pockermap['xb'], _a[0] , _a[1], _a[2], _a[3]);
+									}else{
+										ctx.save();
+										ctx.translate(_a[0], _a[1]);
+										ctx.rotate(_dec);
+										ctx.drawImage(isMy ? pockermap['h4'] : pockermap['xb'], 0 , 0, pw, ph);
+										ctx.restore();
+									}
+								};
+							}(i, j),
+							idx : z
+						});
+						i++;
+						z++;
+						i % lenN === 0 && (j++, i = 0);
+						if(j > a[0].length - 1){
+							clearInterval(rec);
+						}
+					}, 80);
+					timer.addFn('begining-movie', function(){
+						var i = -1, len = arr.length - 1;
+						for(; i++ < len;){
+							arr[i] && arr[i].fn && arr[i].fn();
+						}
+					}, 4);
+				}
+				
+				
+				
+				pushSiteDate(375, 325);
+				pushSiteDate(205, 325);
+				pushSiteDate(135, 280);
+				pushSiteDate(135, 175);
+				pushSiteDate(205, 125);
+				pushSiteDate(375, 125);
+				pushSiteDate(555, 125);
+				pushSiteDate(635, 175);
+				pushSiteDate(635, 280);
+				pushSiteDate(555, 325);
+				//drawDeskTop();
+				//noSend();
+				
+				~function pockerDrawToCanvas(){
+					var i = 0,
+						j = 0,
+						nLenI = suits.length,
+						nLenJ = points.length;
+					for(;i < nLenI; i++){
+						for(j = 0; j < nLenJ; j++){
+							var c = doc.createElement('canvas'), thisname = suits[i].slice(0, 1) + points[j];
+							c.width = pw * 1.5;
+							c.height = ph * 1.5;
+							c.getContext('2d').drawPokerCard(0, 0, c.height, suits[i], points[j]);
+							pockermap[thisname] = c;
+						}
+					}
+					~function drawBackground(){
+						var c = doc.createElement('canvas');
+							c.width = pw * 1.5;
+							c.height = ph * 1.5;
+						c.getContext('2d').drawPokerBack(0, 0, c.height, '#535550', '#90928C');	
+						pockermap['xb'] = c;
+					}();
+					
+				}();
+				
+				arr.push({
+					fn : drawDeskTop,
+					idx : 0
+				});
+				
+				arr.push({
+					fn : noSend,
+					idx : 1
+				});
+				beginToDraw();
+				return;
+				setTimeout(function(){
+					return;
+					timer.addFn('m-begin', function(){
+						var i = -1, len = arr.length - 1;
+						for(; i++ < len;){
+							arr[i] && arr[i].fn && arr[i].fn();
+						}
+					}, 4);
+				}, 1000);
+			}();
+			
+			
+			
+			~function getPocker(){
+				var I = $('#J-i'),
+					J = $('#J-j'),
+					S = $('#J-s'),
+					ok = false,
+					L = 240,
+					Pdesk = [];
+					
+				function clearPocker(){
+					var i = Pdesk.length - 1,
+						rec,
+						arr = [];
+					rec = setInterval(function(){
+						arr.push(function(i){
+							var A = objMove([[Pdesk[i].l, 240]], null, i === 1 ? function(){
+								timer.delFn('clearPocker-clear');
+								ok = false;
+							} : null, 500 - i * 50);
+							return function(){
+								var _a = A();
+								ctx.drawPokerCard(_a[0], 305 , ph, suits[2], points[3]);
+							};
+						}(i));
+						i--;
+						if(i < 1){
+							clearInterval(rec);
+						}
+					}, 120);
+					timer.addFn('clearPocker-clear', function(){
+						var i = -1,
+							len = arr.length - 1;
+						ctx.clearRect(0, 0, W, H);	
+						ctx.drawImage(canvasdesk, 0, 0, W, H);
+						for(; i++ < len;){
+							arr[i] && arr[i]();
+						}
+					}, 4);
+				}	
+				//240, 305	
+				S.click(function(){
+					if(ok){
+						return;
+					}
+					ok = true;
+					var _i = +I.val() || 0,
+						_j = +J.val() || 0;
+					timer.addFn('run-this', function(){
+						var that = arrSites[_i][_j],
+							i, j,
+							lenI = arrSites.length - 1,
+							lenJ = arrSites[0].length - 1,
+							A1, A2,
+							A = objMove([[that.l, L], [that.t, 305]], null, function(){
+								Pdesk.push({
+									l : L,
+									t : 305
+								})
+								L += 30;
+								dk = true;
+								A1 = objMove([[cl, that.l], [ct, that.t], [0, that.d]], null, function(){
+									timer.delFn('run-this');
+									if(Pdesk.length === arrSites.length){
+										clearPocker();
+									}else{
+										ok = false;
+									}
+								}, 400)
+							}, 300),
+							cl = (800 - pw) / 2 - 60,
+							ct = (480 - ph) / 2 + 5,
+							dk = false;
+						return function(){
+							ctx.clearRect(0, 0, W, H);
+							noSend();
+							var lenPdesk = Pdesk.length - 1;
+							if(lenPdesk != -1){
+								for(i = -1; i++ < lenPdesk;){
+									var _a = Pdesk[i];
+									ctx.drawPokerCard(_a.l, _a.t , ph, suits[2], points[3]);
+								}
+							}
+							for(i = -1; i++ < lenI;){
+								for(j = -1; j++ < lenJ;){
+									var _a, _dec;
+									if(i === _i && j === _j){
+										if(!dk){
+											_a = A();
+											ctx.drawPokerCard(_a[0], _a[1] , ph, suits[2], points[3]);
+										}else{
+											_a = A1();
+											_dec = _a[2] * pi / 180;
+											ctx.save();
+											ctx.translate(_a[0], _a[1]);
+											ctx.rotate(_dec);
+											ctx.drawPokerBack(0, 0 , ph, '#535550', '#90928C');
+											ctx.restore();
+										}
+									}else{
+										_a = arrSites[i][j];
+										_dec = _a.d * pi / 180;
+										ctx.save();
+										ctx.translate(_a.l, _a.t);
+										ctx.rotate(_dec);
+										ctx.drawPokerBack(0, 0 , ph, '#535550', '#90928C');
+										ctx.restore();
+									}
+								}
+							}
+						};
+					}(), 4);
+				});
+			}();
+			
+			~function sendPocker(){
+				
+			}();
+			
+			return 
+			//以下是测试用具.
+			var img = new Image(),
+				n = 0, r;
+			img.src = 'http://127.0.0.1/newbusuzi/resources/images/avatar.jpg';
+			timer.init();
+			var f = false;
+			img.onload = function(){
+				var A = objMove([[0, -30], [400, 100], [100, 300]], function(){
+					f = true;
+				}, function(){
+				}, 1200), A1 = objMove([[0, -20], [400, 200], [100, 200]], function(){
+					f = false;
+				}, function(){
+				}, 1200);
+				var Arr = [];
+				function adds(opt){
+					Arr.push(opt);
+					Arr.sort(function(a, b){
+						return a.idx - b.idx;
+					});
+				}
+				timer.addFn('ddd', function(){
+					var i = -1, len = Arr.length - 1;
+					for(; i++ < len;){
+						Arr[i] && Arr[i].fn && Arr[i].fn();
+					}
+				}, 3);
+				adds({
+					fn : function(){
+						ctx.clearRect(0, 0, 800, 480);
+					},
+					idx : 0
+				});
+				adds({
+					fn : function(){
+						var a = A();
+						var _dec = a[0] * pi / 180;
+						ctx.save();
+						ctx.fillStyle = 'pink';
+						ctx.translate(a[1], a[2]);
+						ctx.rotate(_dec);
+						ctx.fillRect(-25, -25, 50, 50);
+						ctx.restore();
+						ctx.fillStyle = 'red';
+						ctx.fillRect(100, 100, 50, 50);
+					},
+					idx : 1
+				});
+				setTimeout(function(){
+					adds({
+						fn : function(){
+							var a = A1();
+							var _dec = a[0] * pi / 180;
+							ctx.save();
+							ctx.fillStyle = 'pink';
+							ctx.translate(a[1], a[2]);
+							ctx.rotate(_dec);
+							ctx.fillRect(-25, -25, 50, 50);
+							ctx.restore();
+						},
+						idx : 2
+					});
+				}, 100);
+				
+				
+				setTimeout(function(){
+					var _ = objMove([[0, 20], [400, 400], [100, 300]], function(){
+								f = false;
+							}, function(){
+								timer.delFn('ddd');
+							}, 1200);
+					adds({
+						fn : function(){
+							var a = _();
+							var _dec = a[0] * pi / 180;
+							ctx.save();
+							ctx.fillStyle = 'pink';
+							ctx.translate(a[1], a[2]);
+							ctx.rotate(_dec);
+							ctx.fillRect(-25, -25, 50, 50);
+							ctx.restore();
+						},
+						idx : 2
+					});
+				}, 500);
+				
+				return;
+				timer.addFn('rotate', function(){
+					var a = A();
+					var _dec = a[0] * pi / 180;
+					ctx.save();
+					ctx.fillStyle = 'pink';
+					ctx.translate(a[1], a[2]);
+					ctx.rotate(_dec);
+					ctx.fillRect(-25, -25, 50, 50);
+					ctx.restore();
+					ctx.fillStyle = 'red';
+					ctx.fillRect(100, 100, 50, 50);
+				}, 3, 4);
+				setTimeout(function(){
+					timer.addFn('rotate-1', function(){
+						var a = A1();
+						var _dec = a[0] * pi / 180;
+						ctx.save();
+						ctx.fillStyle = 'pink';
+						ctx.translate(a[1], a[2]);
+						ctx.rotate(_dec);
+						ctx.fillRect(-25, -25, 50, 50);
+						ctx.restore();
+					}, 3, 2);
+				}, 10);
+				timer.addFn('rotate-2', function(){
+					!f && ctx.clearRect(0, 0, 800, 480);
+				}, 3, 5);
+			};
+		})();
+		</script>
+	</body>
+</html>

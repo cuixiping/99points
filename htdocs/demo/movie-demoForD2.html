@@ -205,11 +205,11 @@
 				canvasOther = $('#canvas-other')[0],
 				ctxSelf = canvasSelf.getContext('2d'),
 				ctxOther = canvasOther.getContext('2d'),
-				W = canvas.width,
-				H = canvas.height,
+				W = canvasSelf.width,
+				H = canvasSelf.height,
 				timer = Timer,
 				m = Math, pi = m.PI;
-			if(!ctx){
+			if(!ctxSelf){
 				return;
 			}
 			
@@ -243,7 +243,9 @@
 				cs = [],
 				doc = document,
 				pw = 30,
-				ph = 40;
+				ph = 40,
+				pockerPoint = [(800 - pw) / 2 - 100, (480 - ph) / 2 + 10],
+				pockermap = {};
 			
 			var arrSites = [],
 				canvasdeskSelf = doc.createElement('canvas'),
@@ -251,18 +253,213 @@
 			canvasdeskSelf.width = canvasdeskOther.width = W;
 			canvasdeskSelf.height = canvasdeskOther.height = H;
 			
-			var players = [
-				'xiaole',
-				'hehe123',
-				'igin',
-				'zhongjun',
-				'jianye',
-				'jianchun',
-				'arlen',
-				'charlie',
-				'spark',
-				'othella'
-			], player_0 = 'hehe123', player_1 = 'igin';
+			var players_list_0 = [
+				{
+					name : 'hehe123',
+					site : [375, 355],
+					pocker : []
+				},
+				{
+					name : 'igin',
+					site : [205, 355],
+					pocker : []
+				},
+				{
+					name : 'xiaole',
+					site : [135, 310],
+					pocker : []
+				},
+				{
+					name : 'zhongjun',
+					site : [135, 205],
+					pocker : []
+				},
+				{
+					name : 'jianye',
+					site : [205, 155],
+					pocker : []
+				},
+				{
+					name : 'jianchun',
+					site : [375, 155],
+					pocker : []
+				},
+				{
+					name : 'arlen',
+					site : [555, 155],
+					pocker : []
+				},
+				{
+					name : 'charlie',
+					site : [635, 205],
+					pocker : []
+				},
+				{
+					name : 'spark',
+					site : [635, 310],
+					pocker : []
+				},
+				{
+					name : 'othella',
+					site : [555, 355],
+					pocker : []
+				}
+			], players_list_1 = [
+				{
+					name : 'igin',
+					site : [375, 355],
+					pocker : []
+				},
+				{
+					name : 'xiaole',
+					site : [135, 310],
+					pocker : []
+				},
+				{
+					name : 'zhongjun',
+					site : [135, 205],
+					pocker : []
+				},
+				{
+					name : 'jianye',
+					site : [205, 155],
+					pocker : []
+				},
+				{
+					name : 'jianchun',
+					site : [375, 155],
+					pocker : []
+				},
+				{
+					name : 'arlen',
+					site : [555, 155],
+					pocker : []
+				},
+				{
+					name : 'charlie',
+					site : [635, 205],
+					pocker : []
+				},
+				{
+					name : 'spark',
+					site : [635, 310],
+					pocker : []
+				},
+				{
+					name : 'othella',
+					site : [555, 355],
+					pocker : []
+				},
+				{
+					name : 'hehe123',
+					site : [205, 355],
+					pocker : []
+				}
+			], player_0 = 'hehe123', player_1 = 'igin',
+			sys_player = ['hehe123', 'igin', 'xiaole', 'zhongjun', 'jianye', 'jianchun', 'arlen', 'charlie', 'spark', 'othella'], 
+			aPocker = [],
+			ran = m.random,
+			floor = m.floor;
+			
+			var pockerZhi = [],
+				pockerZhi_Index = 0,
+				sitePosition = [
+					[205, 155],
+					[375, 155],
+					[555, 155],
+					[635, 205],
+					[635, 310],
+					[555, 355],
+					[375, 355],
+					[205, 355],
+					[135, 310],
+					[135, 205]
+			], pockerInDesk_0 = [], pockerInDesk_1 = [];
+			
+			
+			~function pockerDrawToCanvas(){
+				var i = 0,
+					j = 0,
+					nLenI = suits.length,
+					nLenJ = points.length;
+				for(;i < nLenI; i++){
+					for(j = 0; j < nLenJ; j++){
+						var c = doc.createElement('canvas'), thisname = suits[i].slice(0, 1) + points[j];
+						c.width = pw * 1.5;
+						c.height = ph * 1.5;
+						c.getContext('2d').drawPokerCard(0, 0, c.height, suits[i], points[j]);
+						pockermap[thisname] = c;
+					}
+				}
+				~function drawBackground(){
+					var c = doc.createElement('canvas');
+						c.width = pw * 1.5;
+						c.height = ph * 1.5;
+					c.getContext('2d').drawPokerBack(0, 0, c.height, '#535550', '#90928C');	
+					pockermap['xb'] = c;
+				}();
+				
+			}();
+			
+			~function randomPockerFirst(){
+				var i = 0,
+					len = 200,
+					_arr = [],
+					_len;
+				for(i in pockermap){
+					if(i !== 'xb'){
+						_arr.push(i);
+					}
+				}
+				_len = _arr.length - 1;	
+				for(i = 0; i < len; i++){
+					pockerZhi.push(_arr[floor(ran() * _len)]);
+				}
+			}();
+			
+			function userGetPockers(){
+				var i = 0,
+					arr_0 = players_list_0,
+					arr_1 = players_list_1,
+					len_0 = arr_0.length,
+					len_1 = arr_1.length,
+					z = 0;
+				function findAndPush(name, data){
+					var i = 0, g = 0;
+					for(; i < len_1; i++){
+						var _this = arr_1[i]
+						if(_this['name'] === name){
+							_this.pocker.push(data);
+							break;
+						}
+					}
+				}	
+				for(; i < len_0; i++){
+					var j = 0, g = 0, f = 0;
+					for(; j < 5; j++){
+						var _this = arr_0[i]
+						_this.pocker.push(pockerZhi[z]);
+						aPocker.push({
+							l : _this.site[0] + g,
+							t : _this.site[1],
+							a : f,
+							z : z
+						});
+						findAndPush(arr_0[i].name, pockerZhi[z]);
+						f += 10;
+						g += 10,
+						z++;
+					}
+				}
+			}
+			
+			function drawInitPockers(ctx){
+				var i = 0,
+					len = 5;
+				for(; i  < len; i++){
+					ctx.drawPokerBack(pockerPoint[0] - i, pockerPoint[1] - i - 1 , ph, '#535550', '#90928C');
+				}
+			}
 			
 			function copyDesktop(model, copyFrom){
 				model.getContext('2d').drawImage(copyFrom, 0, 0, W, H);
@@ -272,15 +469,163 @@
 				
 			}
 			
-			function peopleSit(){
-				
+			function sendPockerFirstTime(){
+				var i = 0,
+					j = 0,
+					z = 0,
+					len = 10,
+					rec,
+					arr_0 = [],
+					arr_1 = [];
+				function pockerMove(ctx, playername, uname, i, z, isEnd, tname, pockerInDesk){
+					var pockers = aPocker[z],
+						isMy = playername === uname.name,
+						arrm =  isMy? [[pockerPoint[0], pockers.l - 90 + i * 35], [pockerPoint[1] + 30, pockers.t - 50], [pw, pw * 1.5], [ph, ph * 1.5]] : [[pockerPoint[0], pockers.l], [pockerPoint[1] + 30, pockers.t], [0, pockers.a]],
+						A = objMove(arrm, null, isEnd ? function(){
+							timer.delFn(tname);
+							setTimeout(function(){
+								sendPockerNormal(ctx, 20, 'sendPockerOne-'+playername, pockerInDesk);
+							}, 200);
+						} : null, 300),
+						mypocker;
+					if(isMy){
+						mypocker = pockermap[uname.pocker[i]];
+					}
+					pockerInDesk.push({
+						p : pockermap[uname.pocker[i]],
+						l : isMy ? pockers.l - 90 + i * 35 : pockers.l,
+						t : isMy ? pockers.t - 50 : pockers.t,
+						w : isMy ? pw * 1.5 : pw,
+						h : isMy ? ph * 1.5 : ph,
+						a : isMy ? 0 : pockers.a,
+						o : isMy,
+						z : z,
+						s : false
+					});
+					return function(){
+						var _a = A();
+						if(isMy){
+							ctx.drawImage(mypocker, _a[0] , _a[1], _a[2], _a[3]);
+						}else{
+							ctx.save();
+							ctx.translate(_a[0], _a[1] - 35);
+							ctx.rotate(_a[2] * pi / 180);
+							ctx.drawImage(pockermap['xb'], 0, 0 , pw, ph);
+							ctx.restore();
+						}
+					};
+				}
+				rec = setInterval(function(){
+					arr_0.push(pockerMove(ctxSelf, player_0, players_list_0[j], i, j * 5 + i, j === 9 && i === 4, 'sendPocker-0', pockerInDesk_0));
+					arr_1.push(pockerMove(ctxOther, player_1, players_list_1[j], i, j * 5 + i, j === 9 && i === 4, 'sendPocker-1', pockerInDesk_1));
+					j++;
+					z++;
+					pockerZhi_Index ++;
+					if(j % 10 === 0 ){
+						i ++;
+						j = 0;
+					}
+					if(i > 4){
+						clearInterval(rec);
+					}
+				}, 40);
+				timer.addFn('sendPocker-0', function(){
+					var i = -1, len = arr_0.length - 1;
+					ctxSelf.clearRect(0, 0, W, H);
+					drawInitPockers(ctxSelf);
+					for(; i++ < len;){
+						arr_0[i] && arr_0[i]();
+					}
+				}, 4);
+				timer.addFn('sendPocker-1', function(){
+					var i = -1, len = arr_1.length - 1;
+					ctxOther.clearRect(0, 0, W, H);
+					drawInitPockers(ctxOther);
+					for(; i++ < len;){
+						arr_1[i] && arr_1[i]();
+					}
+				}, 4);
 			}
 			
-			function selfSit(){
-				
+			function sendPockerNormal(ctx, z, tname, pockerInDesk){
+				timer.addFn(tname, function(){
+					var sendMovie,
+						getMovie,
+						pockers = aPocker[z],
+						isMy = z % 10 === 0,
+						site_M = pockerInDesk[z],
+						site_X = floor(ran() * 90) + 340,
+						site_Y = floor(ran() * 75) + 180,
+						site_A = floor(ran() * 180),
+						arrm_Send = [[site_M.w, pw], [site_M.h, ph], [site_M.l, site_X], [site_M.t, site_Y], [site_M.a, site_A]],
+						sended = false,
+						completed = false;
+					sendMovie = objMove(arrm_Send, null, function(){
+						sended = true;
+						site_M.w = pw;
+						site_M.h = ph;
+						site_M.l = site_X;
+						site_M.t = site_Y;
+						site_M.a = site_A;
+						site_M.o = false;
+						site_M.s = true;
+						pockerInDesk.push({
+							p : pockermap[pockerZhi[pockerZhi_Index]],
+							l : pockerPoint[0],
+							t : pockerPoint[1],
+							w : pw,
+							h : ph,
+							a : 0,
+							o : isMy,
+							z : pockerZhi_Index,
+							s : false
+						});
+						pockerZhi_Index++;
+						timer.delFn(tname);
+						
+						timer.addFn(tname +'-s', function(){
+							
+						}, 4);
+					}, 400);
+					return function(){
+						ctx.clearRect(0, 0, W, H);
+						drawInitPockers(ctx);
+						var i = -1, len = pockerInDesk.length - 1,
+							_a;
+						for(; i++ < len;){
+							s = pockerInDesk[i];
+							if(i === z){
+								_a = sendMovie();
+								ctx.save();
+								ctx.translate(_a[2], _a[3] - 35);
+								ctx.rotate(_a[4] * pi / 180);
+								ctx.drawImage(s.p, 0, 0 , _a[0], _a[1]);
+								ctx.restore();
+							}else{
+								if(i % 10 === 0){
+									ctx.drawImage(s.p, s.l, s.t , s.w, s.h);
+								}else{
+									if(sended && i === len){
+									}else{
+										ctx.save();
+										ctx.translate(s.l, s.t - 35);
+										ctx.rotate(s.a * pi / 180);
+										ctx.drawImage(!s.s ? pockermap['xb'] : s.p, 0, 0 , s.w, s.h);
+										ctx.restore();
+									}
+								}
+							}
+						}
+					};
+				}(), 4);
 			}
 			
 			
+			//begin to draw
+			drawInitPockers(ctxSelf);
+			drawInitPockers(ctxOther);
+			userGetPockers();
+			sendPockerFirstTime()
 		})();
 		</script>
 	</body>
