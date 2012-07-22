@@ -1,0 +1,10 @@
+body{background:#3B3433;}
+html{overflow:hidden;}
+
+.canvas{background:url(../../images/99-desktop.png) no-repeat;}
+.outer{border:1px #1F1F1F solid;}
+.game-container{border:1px #666 solid;width:800px;height:480px;overflow:hidden;background:#1C514D;}
+.game-container > .main{float:left;border-right:1px #1F1F1F solid;overflow:hidden;}
+.game-container > .main > .co{background:#3B3433;width:600px;height:480px;border-right:1px #666 solid;position:relative;overflow:hidden;}
+.intr > div{padding:5px;font-size:14px;border:1px #666 solid;color:#fff;}
+button{padding:3px 10px;margin:0 5px 10px 0;}
