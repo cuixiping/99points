@@ -42,9 +42,9 @@
 			var i = -1,
 				arr = this.fnList,
 				len = arr.length - 1;
-			for(;i++ < len;){
-				if(arr[i].name == name){
-					arr.splice(i,1);
+			for(; i++ < len;){
+				if(arr[i].name === name){
+					arr.splice(i, 1);
 					break;
 				}
 			}
@@ -80,13 +80,58 @@
 				if(P.stop) return;
 				if(P.del) clearInterval(rec);
 				itWorks();
-			},10);
+			}, 40);
 		}
 	};
 	window.timer = timer;		
 })();
 
 (function(){
-	// choose and site
+	/*
+	 * Animation 是一个类. 里面包含很多动作.
+	 */
+	var Animation = {
+		status : {
+			
+		},
+		methods : {
+			sendPocker : function(site){
+				var ani = Animation;
+				
+			},
+			getPocker : function(site, pocker){
+				
+			},
+			touchOnPocker : function(){
+				
+			},
+			touchOutPocker : function(){
+				
+			},
+			findPocker : function(){
+				
+			},
+			dealPocker : function(){
+				
+			}
+		},
+		scenes : {
+			begining : {
+				sites : {
+					
+				},
+				init : function(){
+					
+				}
+			},
+			hall : function(){
+				
+			}
+		}
+	};
+	window.Animation = Animation;
+})();
+
+(function(){
 	
 })();
