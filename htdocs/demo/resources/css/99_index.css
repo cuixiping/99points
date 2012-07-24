@@ -1,7 +1,7 @@
 body{background:#3B3433;}
 html{overflow:hidden;}
 
-.canvas{background:url(../../images/99-desktop.png) no-repeat;}
+.canvas{background:url(../../../../images/99-desktop.png) no-repeat;}
 .outer{border:1px #1F1F1F solid;}
 .game-container{border:1px #666 solid;width:800px;height:480px;overflow:hidden;background:#1C514D;}
 .game-container > .main{float:left;border-right:1px #1F1F1F solid;overflow:hidden;}
