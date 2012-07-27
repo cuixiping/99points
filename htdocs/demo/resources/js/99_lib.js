@@ -144,6 +144,7 @@
 		data.pockerSize = [30, 40];		
 		data.pockerPlace = [];
 		data.pockerPoint = [(800 - data.pockerSize[0]) / 2 - 100, (480 - data.pockerSize[1]) / 2 + 10];
+		data.deskSize = [110, 100, 600, 280];
 		for(; i < len; i++){
 			data.pockerPlace[i] = [];
 			var _a = data.pockerPlace[i],
@@ -245,7 +246,7 @@
 			status = ani.status,
 			m = Math,
 			pi = Math.PI,
-			isUser = sites[0] === 0,
+			isSelf = sites[0] === 0,
 			pocker = data.pockerPlace[sites[0]][sites[1]],
 			fnName = 'sendPocker-' + sites[0] + '-' + sites[1],
 			canvas = elms.maincanvas[0],
@@ -253,7 +254,7 @@
 		pocker.i = idx;
 		pocker.v = cards;
 		timer.addFn(fnName, function(){
-			var arrData = isUser ? [
+			var arrData = isSelf ? [
 						[data.pockerPoint[0], pocker.l],
 						[data.pockerPoint[1], pocker.t],
 						[data.pockerSize[0], pocker.w],
@@ -264,7 +265,7 @@
 						[0, pocker.d]
 					],
 				A = ani.methods.objectChanges(arrData, null, callback ? callback : null, 200),
-				func = isUser ? function(a){
+				func = isSelf ? function(a){
 					var _a = a;
 					ctx.drawImage(pocker.v, _a[0], _a[1], _a[2], _a[3]);
 				} : function(a){
@@ -286,30 +287,115 @@
 		}(), 1, pocker.i);	
 	};
 	
-	Animation.methods.sendAndGetPocker = function(sites, cards, backcard, callback){
+	Animation.methods.sendAndGetPocker = function(sites, card, getcard, callback){
+		if(Animation.status.isSendAndGet){
+			return;
+		}
 		var ani = Animation,
 			data = ani.data,
 			status = ani.status,
-			elms = ani.elements,
 			methods = ani.methods,
+			elms = ani.elements,
+			canvas = elms.maincanvas[0],
+			cWidth = canvas.width,
+			cHeight = canvas.height,
+			ctx=  canvas.getContext('2d'),
+			isSelf = sites[0] === 0,
 			m = Math,
 			ran = m.random,
-			i, j, ni, nj;
-		status.isSendAndGetEnded = false;	
+			pi = m.PI,
+			pocker = data.pockerPlace[sites[0]][sites[1]],
+			_card_send = !card ? data.pockerList['s2'] : card,
+			_card_get = !getcard ? data.pockerList['xb'] : !isSelf ? data.pockerList['xb'] : getcard, 
+			_d_send = m.floor(ran() * 90),
+			_l_send = m.floor(ran()* 120) + 360,
+			_t_send = m.floor(ran() * 80) + 180,
+			_arr_send = isSelf ? [
+						[pocker.l, _l_send],
+						[pocker.t, _t_send],
+						[0, _d_send],
+						[pocker.w, data.pockerSize[0]],
+						[pocker.h, data.pockerSize[1]]
+					] : [
+						[pocker.l, _l_send],
+						[pocker.t, _t_send],
+						[pocker.d, _d_send]
+					]
+			,
+			_arr_get = isSelf ? [
+						[data.pockerPoint[0], pocker.l],
+						[data.pockerPoint[1], pocker.t],
+						[data.pockerSize[0], pocker.w],
+						[data.pockerSize[1], pocker.h]
+					] : [
+						[data.pockerPoint[0], pocker.l],
+						[data.pockerPoint[1], pocker.t],
+						[0, pocker.d]
+					]
+			,
+			_A_send = methods.objectChanges(_arr_send, null, function(){
+				status.isSendEnded = true;
+				data.pockerSended.push({
+					l : _l_send,
+					t : _t_send,
+					d : _d_send,
+					w : data.pockerSize[0],
+					h : data.pockerSize[1],
+					i : data.pockerSended.length + 1,
+					v : _card_send
+				});
+				_A_get = methods.objectChanges(_arr_get, null, function(){
+					status.isSendAndGet = false;
+					status.isGetEnded = true;
+					pocker.v = _card_get;
+				});
+			}, 350),
+			_A_get,
+			_func_send = isSelf ? function(){
+				var a = _A_send();
+				ctx.save();
+				ctx.translate(a[0], a[1]);
+				ctx.rotate(a[2] * pi / 180);
+				ctx.drawImage(_card_send, 0, 0, a[3], a[4]);
+				ctx.restore();
+			} :  function(){
+				var a = _A_send();
+				ctx.save();
+				ctx.translate(a[0], a[1]);
+				ctx.rotate(a[2] * pi / 180);
+				ctx.drawImage(_card_send, 0, 0, pocker.w, pocker.h);
+				ctx.restore();
+			},
+			_func_get = isSelf ? function(){
+				var a = _A_get();
+				ctx.drawImage(_card_get, a[0], a[1], a[2], a[3]);
+			} : function(){
+				var a = _A_get();
+				ctx.save();
+				ctx.translate(a[0], a[1]);
+				ctx.rotate(a[2] * pi / 180);
+				ctx.drawImage(_card_get, 0, 0, pocker.w, pocker.h);
+				ctx.restore();
+			};
+			
+		status.isSendEnded = false;
+		status.isGetEnded = false;
+		status.isSendAndGet = true;
+		methods.drawCurrentSendPocker(_card_send);	
 		timer.addFn('clearDeskTop', function(){
-			ctx.clearRect(0, 0, cWidth, cHeight);
+			ctx.clearRect(data.deskSize[0], data.deskSize[1], data.deskSize[2], data.deskSize[3]);
 		}, 1, -1).addFn('drawTheLast', function(){
 			ctx.drawImage(elms.theLastFrame, 0, 0, cWidth, cHeight);
 		}, 1, 0).addFn('send&get', function(){
-			if(status.isSendAndGetEnded){
+			if(status.isGetEnded){
 				timer.delFn('clearDeskTop').delFn('drawTheLast').delFn('send&get');
-				
 			}
 			methods.drawDesktopPockers();
+			methods.drawSendedPockers(sites, !status.isSendEnded?_func_send:_func_get);
 		}, 1, 1);
 	};
 	
-	Animation.methods.drawSendedPockers = function(sites){
+	Animation.methods.drawCurrentSendPocker = function(newPocker){
 		var ani = Animation,
 			data = ani.data,
 			status = ani.status,
@@ -317,13 +403,62 @@
 			elms = ani.elements,
 			canvas = elms.maincanvas[0],
 			ctx = canvas.getContext('2d'),
+			cl = 747,
+			ct = 422,
+			cw = data.pockerSize[0],
+			ch = data.pockerSize[1],
+			arr = data.pockerSended;
+		
+		
+		return;
+		if(arr.length === 0){
+			var _arr_show = [[cl + cw / 2]]
+		}else{
+			
+		}
+			
+		var	lastPocker = arr[arr.length - 1].v;
+			
+		var	_arr_hide = [[cl, cl + cw / 2], [ct, ct + ch / 2], [cw, cw / 2], [ch, ch / 2]];
+		status.isLastPockerHide = false;
+		status.isNewPockerShow = false;	
+		timer.addFn('clearCurrentSendPocker', function(){
+			ctx.clearRect(cl, ct, cw, ch);
+		}, 1, 3).addFn('changeCurrentSendPocker', function(){
+			if(!status.isLastPockerHide){
+				
+			}
+		}, 1, 4);	
+			
+	};
+	
+	Animation.methods.drawSendedPockers = function(sites, func){
+		var ani = Animation,
+			data = ani.data,
+			status = ani.status,
+			methods = ani.methods,
+			elms = ani.elements,
+			canvas = elms.maincanvas[0],
+			ctx = canvas.getContext('2d'),
+			m = Math,
+			pi = m.PI,
 			i, j, ni, nj;
 		for(i = -1, ni = data.pockerPlace.length - 1; i++ < ni;){
 			for(j = -1, nj = data.pockerPlace[i].length - 1; j++  < nj;){
 				if(sites[0] === i && sites[1] === j){
+					func();
 					continue;
 				}
-				
+				var _ = data.pockerPlace[i][j];
+				if(i === 0){
+					ctx.drawImage(_.v, _.l, _.t, _.w, _.h);
+				}else{
+					ctx.save();
+					ctx.translate(_.l, _.t);
+					ctx.rotate(_.d * pi / 180);
+					ctx.drawImage(_.v, 0, 0, _.w, _.h);
+					ctx.restore();
+				}
 			}
 		}
 	};
@@ -335,8 +470,10 @@
 			elms = ani.elements,
 			canvas = elms.maincanvas[0],
 			ctx = canvas.getContext('2d'),
+			m = Math,
+			pi = m.PI,
 			i = -1, arr = data.pockerSended, ni = arr.length - 1;
-		for(; i++ < len;){
+		for(; i++ < ni;){
 			var _ = arr[i];
 			ctx.save();
 			ctx.translate(_.l, _.t);
@@ -377,7 +514,7 @@
 			status.isDrawingObject = false;
 			ani.methods.drawTheLastFrame();
 			timer.addFn('clearDeskTop', function(){
-				ctx.clearRect(0, 0, cWidth, cHeight);
+				ctx.clearRect(data.deskSize[0], data.deskSize[1], data.deskSize[2], data.deskSize[3]);
 			}, 1, -1).addFn('drawTheLast', function(){
 				ctx.drawImage(elms.theLastFrame, 0, 0, cWidth, cHeight);
 			}, 1, 0);
@@ -386,6 +523,14 @@
 				methods.sendBeginingPocker([player.site, z], idx, data.pockerList['xb'], 'isDrawingObject', (i + 1) % len === 0 && (z + 1 > 4) ? function(){
 					timer.delFn('clearDeskTop').delFn('drawTheLast');
 					status.isDrawingObject = true;
+					return;
+					var test_n = 0, test_r = setInterval(function(){
+						Animation.methods.sendAndGetPocker([Math.floor(Math.random()*9),Math.floor(Math.random()*5)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], null);
+						test_n ++;
+						if(test_n > 40){
+							clearInterval(test_r);
+						}
+					}, 2000);
 				} : null);
 				idx ++;
 				i ++;
@@ -400,6 +545,9 @@
 		}();
 		
 		/*
+		 * 
+		 * test code
+		Animation.methods.sendAndGetPocker([Math.floor(Math.random()*9),Math.floor(Math.random()*5)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], null);
 		for(var i = 0, 
 				canvas = $('#canvas')[0],
 				ctx = canvas.getContext('2d'); i < data.pockerPlace.length; i++){
