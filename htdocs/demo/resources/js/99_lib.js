@@ -407,28 +407,48 @@
 			ct = 422,
 			cw = data.pockerSize[0],
 			ch = data.pockerSize[1],
-			arr = data.pockerSended;
+			nl = cl + cw / 4,
+			nt = ct + ch / 4,
+			nw = cw / 2,
+			nh = ch / 2,
+			arr_pk = data.pockerSended,
+			arr_show = [[nl, cl], [nt, ct], [nw, cw], [nh, ch]],
+			arr_hide = [[cl, nl], [ct, nt], [cw, nw], [ch, nh]],
+			func_show, func_hide,
+			action;
 		
-		
-		return;
-		if(arr.length === 0){
-			var _arr_show = [[cl + cw / 2]]
+		if(arr_pk.length === 0){
+			func_show = methods.objectChanges(arr_show, null, function(){
+				status.isNewPockerShow = true;
+			}, 350);
+			action = function(){
+				var a = func_show();
+				ctx.drawImage(newPocker, a[0], a[1], a[2], a[3]);
+			};
 		}else{
-			
+			var	lastPocker = arr_pk[arr_pk.length - 1].v;
+			func_hide = methods.objectChanges(arr_hide, null, function(){
+				status.isLastPockerHide = true;
+				func_show = methods.objectChanges(arr_show, null, function(){
+					status.isNewPockerShow = true;
+				}, 350);
+			}, 350);
+			action = function(){
+				var a = !status.isLastPockerHide ? func_hide() : func_show();
+				ctx.drawImage(!status.isLastPockerHide ? lastPocker : newPocker, a[0], a[1], a[2], a[3]);
+			};
 		}
 			
-		var	lastPocker = arr[arr.length - 1].v;
-			
-		var	_arr_hide = [[cl, cl + cw / 2], [ct, ct + ch / 2], [cw, cw / 2], [ch, ch / 2]];
 		status.isLastPockerHide = false;
 		status.isNewPockerShow = false;	
 		timer.addFn('clearCurrentSendPocker', function(){
 			ctx.clearRect(cl, ct, cw, ch);
 		}, 1, 3).addFn('changeCurrentSendPocker', function(){
-			if(!status.isLastPockerHide){
-				
+			if(status.isNewPockerShow){
+				timer.delFn('clearCurrentSendPocker').delFn('changeCurrentSendPocker');
 			}
-		}, 1, 4);	
+			action();
+		}, 1, 4);
 			
 	};
 	
@@ -523,7 +543,6 @@
 				methods.sendBeginingPocker([player.site, z], idx, data.pockerList['xb'], 'isDrawingObject', (i + 1) % len === 0 && (z + 1 > 4) ? function(){
 					timer.delFn('clearDeskTop').delFn('drawTheLast');
 					status.isDrawingObject = true;
-					return;
 					var test_n = 0, test_r = setInterval(function(){
 						Animation.methods.sendAndGetPocker([Math.floor(Math.random()*9),Math.floor(Math.random()*5)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], null);
 						test_n ++;
