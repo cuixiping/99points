@@ -348,7 +348,7 @@
 					status.isSendAndGet = false;
 					status.isGetEnded = true;
 					pocker.v = _card_get;
-				});
+				}, 400);
 			}, 350),
 			_A_get,
 			_func_send = isSelf ? function(){
@@ -413,7 +413,7 @@
 			nh = ch / 2,
 			arr_pk = data.pockerSended,
 			arr_show = [[nl, cl], [nt, ct], [nw, cw], [nh, ch]],
-			arr_hide = [[cl, nl], [ct, nt], [cw, nw], [ch, nh]],
+			arr_hide = [[cl, nl], [ct, nt], [cw, nw], [ch, nh], [1, 0.2]],
 			func_show, func_hide,
 			action;
 		
@@ -435,7 +435,14 @@
 			}, 350);
 			action = function(){
 				var a = !status.isLastPockerHide ? func_hide() : func_show();
-				ctx.drawImage(!status.isLastPockerHide ? lastPocker : newPocker, a[0], a[1], a[2], a[3]);
+				if(!status.isLastPockerHide){
+					ctx.save();
+					ctx.globalAlpha = a[4];
+					ctx.drawImage(lastPocker, a[0], a[1], a[2], a[3]);
+					ctx.restore();
+				}else{
+					ctx.drawImage(newPocker, a[0], a[1], a[2], a[3]);
+				}
 			};
 		}
 			
@@ -473,6 +480,9 @@
 				if(i === 0){
 					ctx.drawImage(_.v, _.l, _.t, _.w, _.h);
 				}else{
+					if(!_.v){
+						continue;
+					}
 					ctx.save();
 					ctx.translate(_.l, _.t);
 					ctx.rotate(_.d * pi / 180);
@@ -495,6 +505,9 @@
 			i = -1, arr = data.pockerSended, ni = arr.length - 1;
 		for(; i++ < ni;){
 			var _ = arr[i];
+			if(!_.v){
+				continue;
+			}
 			ctx.save();
 			ctx.translate(_.l, _.t);
 			ctx.rotate(_.d * pi / 180);
@@ -543,8 +556,13 @@
 				methods.sendBeginingPocker([player.site, z], idx, data.pockerList['xb'], 'isDrawingObject', (i + 1) % len === 0 && (z + 1 > 4) ? function(){
 					timer.delFn('clearDeskTop').delFn('drawTheLast');
 					status.isDrawingObject = true;
+					function getRan(n){
+						return m.floor(m.random() * n);
+					}
 					var test_n = 0, test_r = setInterval(function(){
-						Animation.methods.sendAndGetPocker([Math.floor(Math.random()*9),Math.floor(Math.random()*5)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], null);
+						var _r0 = userData[getRan(len)].site,
+							_r1 = getRan(5);
+						Animation.methods.sendAndGetPocker([_r0, _r1], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random() * 9) + 1)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], null);
 						test_n ++;
 						if(test_n > 40){
 							clearInterval(test_r);
@@ -562,30 +580,6 @@
 				}
 			}, 70);
 		}();
-		
-		/*
-		 * 
-		 * test code
-		Animation.methods.sendAndGetPocker([Math.floor(Math.random()*9),Math.floor(Math.random()*5)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], null);
-		for(var i = 0, 
-				canvas = $('#canvas')[0],
-				ctx = canvas.getContext('2d'); i < data.pockerPlace.length; i++){
-			for(var j = 0,
-					arr = data.pockerPlace[i],
-					len = arr.length; j < len; j++){
-				var _ = arr[j];
-				if(_.s) {
-					ctx.drawImage(data.pockerList['xb'], _.l, _.t, _.w, _.h);
-				} else {
-					ctx.save();
-					ctx.translate(_.l, _.t);
-					ctx.rotate(_.d * pi / 180);
-					ctx.drawImage(data.pockerList['xb'], 0, 0, _.w, _.h);
-					ctx.restore();
-				}
-			}
-		}
-		*/
 	};
 	
 	
