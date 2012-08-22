@@ -1,11 +1,10 @@
 /*
  Author: Xiaole Tao (http://xiaole.happylive.org)
  */
-var poker = {};
 (function() {
-	if(window.CanvasRenderingContext2D) {
+	if (window.CanvasRenderingContext2D) {
 
-		poker.enabled = true;
+		window.poker = { 'enabled' : true };
 
 		poker.symbolPath = {
 			'hearts' : 'M100,30C60,7 0,7 0,76C0,131 100,190 100,190C100,190 200,131 200,76C200,7 140,7 100,30z',
@@ -50,7 +49,7 @@ var poker = {};
 			r = r || 20;
 
 			this.beginPath();
-			if(!dir) {
+			if (!dir) {
 				this.moveTo(x + r, y);
 				this.lineTo(x + w - r, y);
 				this.arc(x + w - r, y + r, r, (Math.PI / 180) * 270, 0);
@@ -105,14 +104,9 @@ var poker = {};
 			sa = svgPath.replace(/ *([MmZzLlHhVvCcSsQqTtAa]) */g, '|$1,').replace(/^\||\|[zZ],/g, '').split(/\|/);
 
 			this.beginPath();
-			for(pn in sa) {
+			for (pn in sa) {
 				pa = sa[pn].split(/[, ]/);
-				(pa[0] === 'M') ? (this.moveTo(ax(pa[1]), ay(pa[2]))) : 
-				(pa[0] === 'L') ? (this.lineTo(ax(pa[1]), ay(pa[2]))) : 
-				(pa[0] === 'H') ? (this.lineTo(ax(pa[1]), ry)) : 
-				(pa[0] === 'V') ? (this.lineTo(rx, ay(pa[1]))) : 
-				(pa[0] === 'C') ? (this.bezierCurveTo(ax(pa[1]), ay(pa[2]), ax(pa[3]), ay(pa[4]), ax(pa[5]), ay(pa[6]))) : 
-				(pa[0] === 'Q') && (this.quadraticCurveTo(ax(pa[1]), ay(pa[2]), ax(pa[3]), ay(pa[4])));
+				(pa[0] === 'M') ? (this.moveTo(ax(pa[1]), ay(pa[2]))) : (pa[0] === 'L') ? (this.lineTo(ax(pa[1]), ay(pa[2]))) : (pa[0] === 'H') ? (this.lineTo(ax(pa[1]), ry)) : (pa[0] === 'V') ? (this.lineTo(rx, ay(pa[1]))) : (pa[0] === 'C') ? (this.bezierCurveTo(ax(pa[1]), ay(pa[2]), ax(pa[3]), ay(pa[4]), ax(pa[5]), ay(pa[6]))) : (pa[0] === 'Q') && (this.quadraticCurveTo(ax(pa[1]), ay(pa[2]), ax(pa[3]), ay(pa[4])));
 				rx = px;
 				ry = py;
 			}
@@ -138,8 +132,7 @@ var poker = {};
 			x = x || 0;
 			y = y || 0;
 			size = size || 200;
-			symbol = (symbol || 'hearts').toLowerCase();
-			((poker.symbolPath[symbol]) && this.svgCurve(poker.symbolPath[symbol], x, y, size));
+			symbol = (symbol || 'hearts').toLowerCase(); ((poker.symbolPath[symbol]) && this.svgCurve(poker.symbolPath[symbol], x, y, size));
 		};
 		CanvasRenderingContext2D.prototype.strokePokerSymbol = function(symbol, x, y, size) {
 			this.drawPokerSymbol(symbol, x + 0.5, y + 0.5, size - 1);
@@ -333,21 +326,37 @@ var poker = {};
 
 			this.drawEmptyCard(ax(0), ay(0), as(200));
 			this.fillStyle = (suit === 'hearts' || suit === 'diamonds') ? '#a22' : '#000';
-			if(point !== 'joker') {
-				this.fillPokerSymbol(suit, ax(40), ay(65), as(70));
-				this.fillPokerSymbol(point, ax(10), ay(10), as(30));
-				this.fillPokerSymbol(suit, ax(11), ay(45), as(19));
-				this.fillPokerSymbol(point, ax(140), ay(190), as(-30));
-				this.fillPokerSymbol(suit, ax(139), ay(155), as(-19));
-			} else {
-				this.fillPokerSymbol('joker', ax(11), ay(10), as(18));
-				this.fillPokerSymbol('joker', ax(139), ay(190), as(-18));
-				if(suit === 'hearts' || suit === 'diamonds') {
-					this.drawPokerCrown(ax(38), ay(63), as(74), '#b55', '#a22');
-					this.drawPokerCrown(ax(40), ay(65), as(70), '#fdf98b', '#e7bd4f', '#a22');
+			if (size >= 100) {
+				if (point !== 'joker') {
+					this.fillPokerSymbol(suit, ax(40), ay(65), as(70));
+					this.fillPokerSymbol(point, ax(10), ay(10), as(40));
+					this.fillPokerSymbol(suit, ax(11), ay(55), as(25));
+					this.fillPokerSymbol(point, ax(140), ay(190), as(-40));
+					this.fillPokerSymbol(suit, ax(139), ay(145), as(-25));
 				} else {
-					this.drawPokerCrown(ax(38), ay(63), as(74), '#000', '#000');
-					this.drawPokerCrown(ax(40), ay(65), as(70), '#eee', '#888', '#333');
+					this.fillPokerSymbol('joker', ax(11), ay(10), as(18));
+					this.fillPokerSymbol('joker', ax(139), ay(190), as(-18));
+					if (suit === 'hearts' || suit === 'diamonds') {
+						this.drawPokerCrown(ax(38), ay(63), as(74), '#b55', '#a22');
+						this.drawPokerCrown(ax(40), ay(65), as(70), '#fdf98b', '#e7bd4f', '#a22');
+					} else {
+						this.drawPokerCrown(ax(38), ay(63), as(74), '#000', '#000');
+						this.drawPokerCrown(ax(40), ay(65), as(70), '#eee', '#888', '#333');
+					}
+				}
+			} else {
+				if (point !== 'joker') {
+					this.fillPokerSymbol(suit, ax(30), ay(75), as(100));
+					this.fillPokerSymbol(point, ax(15), ay(15), as(50));
+				} else {
+					this.fillPokerSymbol('joker', ax(11), ay(10), as(22));
+					if (suit === 'hearts' || suit === 'diamonds') {
+						this.drawPokerCrown(ax(45), ay(73), as(89), '#b55', '#a22');
+						this.drawPokerCrown(ax(47), ay(75), as(85), '#fdf98b', '#e7bd4f', '#a22');
+					} else {
+						this.drawPokerCrown(ax(45), ay(73), as(89), '#000', '#000');
+						this.drawPokerCrown(ax(47), ay(75), as(85), '#eee', '#888', '#333');
+					}
 				}
 			}
 		};
@@ -369,11 +378,11 @@ var poker = {};
 			x = x || 0;
 			y = y || 0;
 			text = text || 'Hello!';
-			if(!nPosition || !nPosition.toString().match(/[123456]/)) {
+			if (!nPosition || !nPosition.toString().match(/[123456]/)) {
 				nPosition = 1;
 			}
 
-			if(bLight) {
+			if (bLight) {
 				colorPack = ['#f9bf12', '#f7aa0f', '#f3800a'];
 			} else {
 				colorPack = ['#dfd4b0', '#cdbc84', '#b39a5c'];
@@ -394,7 +403,7 @@ var poker = {};
 			this.fillStyle = '#222';
 			this.fillText(text, x + 10, y + 13);
 
-			if(nPosition == 4 || nPosition == 5 || nPosition == 6) {
+			if (nPosition == 4 || nPosition == 5 || nPosition == 6) {
 				x1 = (nPosition == 4) ? x + 15 : (nPosition == 5) ? x + labelWidth / 2 - 3 : x + labelWidth - 18;
 				fillStyle = 'rgba(255,255,255,0.4)';
 				this.beginPath();
