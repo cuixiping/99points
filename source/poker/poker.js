@@ -4,9 +4,7 @@
 (function() {
 	if (window.CanvasRenderingContext2D) {
 
-		window.poker = { 'enabled' : true };
-
-		poker.symbolPath = {
+		window.poker = { 'symbolPath' : {
 			'hearts' : 'M100,30C60,7 0,7 0,76C0,131 100,190 100,190C100,190 200,131 200,76C200,7 140,7 100,30z',
 			'diamonds' : 'M184,100C152,120,120,160,100,200C80,160,48,120,16,100C48,80,80,40,100,0C120,40,152,80,184,100z',
 			'spades' : 'M200,120C200,168,144,176,116,156C116,180,116,188,128,200C112,196,88,196,72,200C84,188,84,180,84,156C56,176,0,168,0,120C0,72,60,36,100,0C140,36,200,72,200,120z',
@@ -27,7 +25,7 @@
 			'crown' : 'M 44,60 C 45,56 -3,33 0,70 C 2,107 39,146 48,150 C 57,154 12,107 12,77 C 12,45 43,65 44,60 M 37,65 C 31,64 20,60 19,81 C 19,100 63,158 65,149 C 65,139 33,102 37,65 M 86,56 C 87,52 38,28 40,66 C 43,103 69,141 78,148 C 86,155 54,102 54,71 C 54,39 86,60 86,56 M 82,65 C 77,64 59,54 59,74 C 60,95 82,146 84,138 C 86,132 78,102 82,65 M 154,60 C 153,56 203,33 200,70 C 197,107 159,146 151,150 C 142,154 187,107 187,77 C 187,45 155,65 154,60 M 161,65 C 167,64 179,60 180,81 C 181,100 137,158 135,149 C 134,139 165,102 161,65 M 113,56 C 112,52 161,28 158,66 C 155,103 130,141 122,148 C 114,155 145,102 145,71 C 145,39 114,60 113,56 M 117,65 C 123,64 141,54 141,74 C 140,95 118,146 116,138 C 114,132 121,102 117,65 z',
 			'nine' : 'M157,89C159,188 80,211 16,196L23,160C62,172 100,167 107,119C93,127 83,133 62,132C28,133 0,113 0,70C0,25 37,0 78,0C137,0 157,41 157,89M105,56C100,42 92,34 77,33C59,33 49,49 49,69C52,101 83,104 107,95C107,82 108,66 105,56z',
 			'joker' : 'M141,0L181,0C168,55 161,150 129,183C91,219 15,198 21,141L60,137C58,157 62,166 81,166C102,165 110,143 115,118M6,378C6,306 53,256 119,256C197,256 213,346 187,398C164,438 130,458 88,459C39,458 7,422 6,378M47,377C49,406 67,425 93,425C168,423 182,292 115,290C69,294 47,338 47,377M0,714L42,518L84,518L66,601L159,518L215,518L124,595L191,714L144,714L94,621L55,654L42,714M8,973L50,777L200,777L193,809L85,809L75,854L180,854L173,887L68,887L56,940L173,940L166,973M43,1231L1,1231L44,1035L133,1035C170,1037 197,1051 198,1087C195,1127 169,1143 136,1148C158,1171 171,1206 182,1231L137,1231C116,1182 112,1150 60,1150M67,1121C96,1121 155,1126 156,1087C151,1061 100,1068 78,1068z'
-		};
+		}};
 
 		/*
 		 -----------
@@ -360,77 +358,5 @@
 				}
 			}
 		};
-
-		/*
-		 -----------
-		 画标签
-		 -----------
-		 x,y 左上角坐标，缺省值0,0
-		 text 文本，缺省为Hello
-		 bLight 是否高亮，缺省为false
-		 nPosition 位置，123左上中上右上，456左下中下右下
-		 例：
-		 canvas.drawLabel(0,400,'Xiaole Tao',true,4);
-		 */
-		CanvasRenderingContext2D.prototype.drawLabel = function(x, y, text, bLight, nPosition) {
-			var x1, fillLinGrad, colorPack, labelHeight = 15, labelWidth;
-
-			x = x || 0;
-			y = y || 0;
-			text = text || 'Hello!';
-			if (!nPosition || !nPosition.toString().match(/[123456]/)) {
-				nPosition = 1;
-			}
-
-			if (bLight) {
-				colorPack = ['#f9bf12', '#f7aa0f', '#f3800a'];
-			} else {
-				colorPack = ['#dfd4b0', '#cdbc84', '#b39a5c'];
-			}
-			labelWidth = text.length * 7 + 18;
-			this.strokeStyle = 'rgba(10,10,10,0.6)';
-			this.strokeRoundRect(x + 2, y + 2, labelWidth, labelHeight, 3);
-			this.strokeStyle = colorPack[0];
-			this.strokeRoundRect(x, y, labelWidth, labelHeight, 3);
-			fillLinGrad = this.createLinearGradient(x + 1, y + 1, x + 1, y + 1 + labelHeight);
-			fillLinGrad.addColorStop(0, colorPack[1]);
-			fillLinGrad.addColorStop(1, colorPack[2]);
-			this.fillStyle = fillLinGrad;
-			this.fillRoundRect(x + 1, y + 1, labelWidth, labelHeight, 3);
-			this.font = "12px Consolas";
-			this.fillStyle = 'rgba(255,255,255,0.6)';
-			this.fillText(text, x + 10, y + 12);
-			this.fillStyle = '#222';
-			this.fillText(text, x + 10, y + 13);
-
-			if (nPosition == 4 || nPosition == 5 || nPosition == 6) {
-				x1 = (nPosition == 4) ? x + 15 : (nPosition == 5) ? x + labelWidth / 2 - 3 : x + labelWidth - 18;
-				fillStyle = 'rgba(255,255,255,0.4)';
-				this.beginPath();
-				this.moveTo(x1, y + 16);
-				this.lineTo(x1 + 3, y + 21);
-				this.lineTo(x1 + 6, y + 16);
-				this.closePath();
-				this.fill();
-				this.fillStyle = colorPack[2];
-				this.beginPath();
-				this.moveTo(x1, y + 16);
-				this.lineTo(x1 + 3, y + 20);
-				this.lineTo(x1 + 6, y + 16);
-				this.closePath();
-				this.fill();
-			} else {
-				x1 = (nPosition == 1) ? x + 15 : (nPosition == 2) ? x + labelWidth / 2 - 3 : x + labelWidth - 18;
-				this.fillStyle = colorPack[1];
-				this.beginPath();
-				this.moveTo(x1, y + 1);
-				this.lineTo(x1 + 3, y - 3);
-				this.lineTo(x1 + 6, y + 1);
-				this.closePath();
-				this.fill();
-			}
-		};
-	} else {
-		poker.enabled = false;
 	}
 })();
