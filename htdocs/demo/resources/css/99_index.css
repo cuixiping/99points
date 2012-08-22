@@ -1,10 +1,17 @@
 body{background:#3B3433;}
 html{overflow:hidden;}
 
-.canvas{background:url(../../images/99-desktop.png) no-repeat;}
+.canvas{background:url(../../../../images/99-desktop.png) no-repeat;}
 .outer{border:1px #1F1F1F solid;}
-.game-container{border:1px #666 solid;width:800px;height:480px;overflow:hidden;background:#1C514D;}
+.game-container{border:1px #666 solid;width:800px;height:480px;overflow:hidden;background:#1C514D;position:relative;}
 .game-container > .main{float:left;border-right:1px #1F1F1F solid;overflow:hidden;}
 .game-container > .main > .co{background:#3B3433;width:600px;height:480px;border-right:1px #666 solid;position:relative;overflow:hidden;}
+.game-container > .reg{text-align:center;padding-top:140px;line-height:150%;color:#F2F2F2;}
+.game-container > .reg > h1{font-size:28px;font-weight:bold;text-align:center;margin-bottom:15px;}
+.game-container > .reg > span{vertical-align:top;}
+.game-container > .reg input.txt{width:250px;height:24px;border:1px #006599 solid;margin-bottom:10px;}
+.game-container button.sendBtn{position:absolute;left:502px;top:334px;width:42px;height:25px;border:1px #2B7731 solid;text-align:center;border-radius:6px;overflow:hidden;color:#333;background:-webkit-gradient(linear, left top, left bottom, from(#C6C6C6), to(#A0A0A0));}
+.game-container button.cansend{color:#fff;background:-webkit-gradient(linear, left top, left bottom, from(#65D66D), to(#33AA3B));}
+.game-container button.warning{color:#fff;background:-webkit-gradient(linear, left top, left bottom, from(#F43C45), to(#CB0710));}
 .intr > div{padding:5px;font-size:14px;border:1px #666 solid;color:#fff;}
 button{padding:3px 10px;margin:0 5px 10px 0;}

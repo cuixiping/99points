@@ -16,16 +16,16 @@
 				<div class="clear-fixed">
 					<div class="float-left w802 outer position-r">
 						<div class="game-container center">
-							<div class="main">
+							<div class="hide main">
 								<div class="co">
 									<ul>
 										<li>
-											123
+											 
 										</li>
 									</ul>
 								</div>
 							</div>
-							<canvas id="canvas" class="hide center canvas" width="800" height="480" >
+							<canvas id="canvas" class="center canvas" width="800" height="480" >
 								didn't supports canvas
 							</canvas>
 						</div>
@@ -36,6 +36,51 @@
 		</div>
 		<script type="text/javascript">
 		(function(){
+			var ani = Animation,
+				userData = [
+					{
+						name : 'othella',
+						site  : 8
+					},
+					{
+						name : 'xiaole',
+						site : 9
+					},
+					{
+						name : 'jerrod',
+						site : 0
+					},
+					{
+						name : 'igin',
+						site : 1
+					},
+					{
+						name : 'charlie',
+						site : 2
+					},
+					{
+						name : 'arlen',
+						site : 3
+					},
+					{
+						name : 'jianye',
+						site : 4
+					},
+					{
+						name : 'jianchun',
+						site : 5
+					},
+					{
+						name : 'zhongjun',
+						site : 6
+					},
+					{
+						name : 'spark',
+						site : 7
+					}
+				];
+			ani.elements.maincanvas = $('#canvas');
+			ani.scenes.begining(userData);
 		})();
 		</script>
 	</body>

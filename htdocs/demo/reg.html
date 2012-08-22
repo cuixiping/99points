@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>reg</title>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="resources/css/common.css" />
+		<link rel="stylesheet" type="text/css" href="resources/css/99_index.css" />
+		<script type="text/javascript" src="../lib/poker.min.js"></script>
+		<script type="text/javascript" src="resources/js/99_lib.js"></script>
+		<script type="text/javascript" src="../lib/jquery.min.js" ></script>
+	</head>
+	<body>
+		<div id="page">
+			<div id="header" class="w960 center">&nbsp;</div>
+			<div id="content" class="w960 center">
+				<div class="clear-fixed">
+					<div class="float-left w802 outer position-r">
+						<div class="game-container center">
+							<div class="reg">
+								<h1>99 points Reg</h1>
+								<span class="inline-block">
+									<input type="text" maxlength="20" class="txt" id="J-username" /><br />
+									<label for="J-sexMale">
+										<input type="radio" value="male" name="sex" checked="checked" id="J-sexMale" />
+										Man
+									</label> &nbsp;  &nbsp; 
+									<label for="J-sexFemale">
+										<input type="radio" value="female" name="sex" id="J-sexFemale" />
+										Woman
+									</label>
+								</span>
+								<span class="inline-block">
+									<button type="submit" id="J-regBtn" >
+										<span>Reg</span>
+									</button>
+								</span>
+							</div>
+							<canvas id="canvas" class="hide center canvas" width="800" height="480" >
+								didn't supports canvas
+							</canvas>
+						</div>
+					</div>
+				</div>	
+			</div>
+		</div>
+		<script type="text/javascript">
+		(function(){
+			function func_reg(){
+				
+			}
+			$('$J-regBtn').click(func_reg);
+		})();
+		</script>
+	</body>
+</html>				
