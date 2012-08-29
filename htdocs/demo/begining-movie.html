@@ -6,6 +6,7 @@
 		<style type="text/css">
 		html,body,h1,h2,h3,h4,h5,h6,hr,p,blockquote,dl,dt,dd,ul,ol,li,pre,form,fieldset,legend,button,input,textarea,th,td{margin:0;padding:0;}
 		body,button,input,select,textarea{font:12px/1.5 tahoma,arial,\5b8b\4f53;}
+		body{background:#3B3433;}
 		html{overflow-y:scroll;}
 		h1,h2,h3,h4,h5,h6{font-size:100%;}
 		address,cite,dfn,em,var{font-style:normal;}
@@ -67,7 +68,21 @@
 		.w150{width:150px;}
 		.w180{width:180px;}	
 		
-		.canvas{background:url(../../images/bg-desktop.png) no-repeat;}
+		.w1610{width:1610px;}
+		.w960{width:960px;}
+		.w800{width:800px;}
+		.w802{width:802px}
+		.w700{width:700px;}
+		.w650{width:650px;}
+		.w520{width:520px;}
+		.w120{width:120px;}
+		.w150{width:150px;}
+		.w180{width:180px;}	
+		
+		.canvas{border:1px #666 solid;background:url(../../images/99-desktop.png) no-repeat;}
+		.outer{border:1px #1F1F1F solid;}
+		.intr > div{padding:5px;font-size:14px;border:1px #666 solid;color:#fff;}
+		button{padding:3px 10px;margin:0 5px 10px 0;}
 		</style>
 		<script src="../lib/poker.min.js"></script>
 		<script type="text/javascript">
@@ -170,11 +185,13 @@
 					输入第几张牌 (0 ~ 4)
 					<br />
 				</div>
-				<div style="border:1px red solid;text-align:center;" class="w800 center">
-					<canvas id="canvas" class="center canvas" width="800" height="480" >
-						didn't supports canvas
-					</canvas>
-				</div>	
+				<div class="clear-fixed">
+					<div class="float-left w802 outer position-r">
+						<canvas id="canvas" class="center canvas" width="800" height="480" >
+							didn't supports canvas
+						</canvas>
+					</div>
+				</div>		
 			</div>
 			<div id="footer" class="w960 center">&nbsp;</div>
 		</div>
@@ -235,7 +252,12 @@
 			*/
 			
 			var arrSites = [],
-				canvasdesk = document.createElement('canvas');
+				canvasdesk = document.createElement('canvas'),
+				sys_player = ['hehe123', 'igin', 'xiaole', 'zhongjun', 'jianye', 'jianchun', 'arlen', 'charlie', 'spark', 'othella'], 
+				aPocker = [],
+				ran = m.random,
+				floor = m.floor,
+				pockermap = {};
 			canvasdesk.width = W;
 			canvasdesk.height = H;
 			function noSend(){
@@ -324,7 +346,7 @@
 									ctx.save();
 									ctx.translate(_a[0], _a[1]);
 									ctx.rotate(_dec);
-									ctx.drawPokerBack(0, 0 , ph, '#535550', '#90928C');
+									ctx.drawImage(pockermap['xb'], 0 , 0, pw, ph);
 									ctx.restore();
 								};
 							}(i, j),
@@ -345,33 +367,42 @@
 					}, 4);
 				}
 				
-				
-				//sendP(120, (480 - ph) / 2 + 60);
-				/*
-				sendP(205, 155);
-				sendP(375, 155);
-				sendP(555, 155);
-				sendP(635, 205);
-				sendP(635, 310);
-				sendP(555, 355);
-				sendP(375, 355);
-				sendP(205, 355);
-				sendP(135, 310);
-				sendP(135, 205);
-				*/
-				
-				pushSiteDate(205, 155);
-				pushSiteDate(375, 155);
-				//pushSiteDate(555, 155);
-				pushSiteDate(635, 205);
-				pushSiteDate(635, 310);
-				//pushSiteDate(555, 355);
-				pushSiteDate(375, 355);
-				pushSiteDate(205, 355);
-				pushSiteDate(135, 310);
-				pushSiteDate(135, 205);
+				pushSiteDate(205, 125);
+				pushSiteDate(375, 125);
+				pushSiteDate(555, 125);
+				pushSiteDate(635, 175);
+				pushSiteDate(635, 280);
+				pushSiteDate(555, 325);
+				pushSiteDate(375, 325);
+				pushSiteDate(205, 325);
+				pushSiteDate(135, 280);
+				pushSiteDate(135, 175);
 				//drawDeskTop();
 				//noSend();
+				
+				~function pockerDrawToCanvas(){
+					var i = 0,
+						j = 0,
+						nLenI = suits.length,
+						nLenJ = points.length;
+					for(;i < nLenI; i++){
+						for(j = 0; j < nLenJ; j++){
+							var c = doc.createElement('canvas'), thisname = suits[i].slice(0, 1) + points[j];
+							c.width = pw * 1.5;
+							c.height = ph * 1.5;
+							c.getContext('2d').drawPokerCard(0, 0, c.height, suits[i], points[j]);
+							pockermap[thisname] = c;
+						}
+					}
+					~function drawBackground(){
+						var c = doc.createElement('canvas');
+							c.width = pw * 1.5;
+							c.height = ph * 1.5;
+						c.getContext('2d').drawPokerBack(0, 0, c.height, '#535550', '#90928C');	
+						pockermap['xb'] = c;
+					}();
+					
+				}();
 				
 				arr.push({
 					fn : drawDeskTop,
@@ -417,7 +448,7 @@
 							} : null, 500 - i * 50);
 							return function(){
 								var _a = A();
-								ctx.drawPokerBack(_a[0], 305 , ph, suits[2], points[3]);
+								ctx.drawPokerCard(_a[0], 305 , ph, suits[2], points[3]);
 							};
 						}(i));
 						i--;
@@ -453,7 +484,7 @@
 								Pdesk.push({
 									l : L,
 									t : 305
-								})
+								});
 								L += 30;
 								dk = true;
 								A1 = objMove([[cl, that.l], [ct, that.t], [0, that.d]], null, function(){
@@ -463,7 +494,7 @@
 									}else{
 										ok = false;
 									}
-								}, 400)
+								}, 400);
 							}, 300),
 							cl = (800 - pw) / 2 - 60,
 							ct = (480 - ph) / 2 + 5,
@@ -475,7 +506,7 @@
 							if(lenPdesk != -1){
 								for(i = -1; i++ < lenPdesk;){
 									var _a = Pdesk[i];
-									ctx.drawPokerBack(_a.l, _a.t , ph, suits[2], points[3]);
+									ctx.drawPokerCard(_a.l, _a.t , ph, suits[2], points[3]);
 								}
 							}
 							for(i = -1; i++ < lenI;){
@@ -484,7 +515,7 @@
 									if(i === _i && j === _j){
 										if(!dk){
 											_a = A();
-											ctx.drawPokerBack(_a[0], _a[1] , ph, suits[2], points[3]);
+											ctx.drawPokerCard(_a[0], _a[1] , ph, suits[2], points[3]);
 										}else{
 											_a = A1();
 											_dec = _a[2] * pi / 180;
