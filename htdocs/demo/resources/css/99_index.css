@@ -1,11 +1,22 @@
 body{background:#3B3433;}
 html{overflow:hidden;}
 
-.canvas{background:url(../../../../images/99-desktop.png) no-repeat;}
+.canvas{background:url(../images/99-desktop.png) no-repeat;}
 .outer{border:1px #1F1F1F solid;}
-.game-container{border:1px #666 solid;width:800px;height:480px;overflow:hidden;background:#1C514D;position:relative;}
-.game-container > .main{float:left;border-right:1px #1F1F1F solid;overflow:hidden;}
-.game-container > .main > .co{background:#3B3433;width:600px;height:480px;border-right:1px #666 solid;position:relative;overflow:hidden;}
+.game-container{border:1px #666 solid;width:800px;height:480px;overflow:hidden;position:relative;background:url(../images/bg-none.png) no-repeat;}
+.game-container > .main{float:left;overflow:hidden;}
+.game-container > .main > .co{width:600px;height:480px;position:relative;overflow-y:auto;}
+.game-container > .main > .co ul{clear:both;padding:15px;}
+.game-container > .main > .co ul li{position:relative;float:left;width:254px;height:100px;overflow:hidden;background:url(../images/99-hall-desktop.png) no-repeat;margin:0 10px 15px 0;padding:150px 0 0 12px;}
+.game-container > .main > .co ul li div.status{font-size:14px;font-weight:bold;padding:2px 0 0 10px;position:absolute;width:60px;height:23px;left:110px;top:68px;border:1px #FEFEFE solid;border-radius:5px;}
+.game-container > .main > .co ul li div.f-wait{color:#C77405;}
+.game-container > .main > .co ul li div.f-lock{color:#CB0710;}
+.game-container > .main > .co ul li div.f-game{color:#00CC00;}
+.game-container > .main > .co ul li > a{position:relative;text-decoration:none;display:inline-block;width:40px;height:40px;margin:0 5px 10px 0;border:1px #C06C1B solid;border-radius:2px;}
+.game-container > .main > .co ul li > a span.status{width:5px;height:10px;border:1px #E1E1E1 solid;border-radius:5px;position:absolute;display:block;right:2px;top:-5px;background:red}
+.game-container > .main > .co ul li > a span.img{width:40px;height:40px;overflow:hidden;display:block;}
+.game-container > .main > .co ul li > a.seats-f{border:1px #44891E solid;}
+.game-container > .main > .co ul li.noMarginRight{margin-right:0;}
 .game-container > .reg{text-align:center;padding-top:140px;line-height:150%;color:#F2F2F2;}
 .game-container > .reg > h1{font-size:28px;font-weight:bold;text-align:center;margin-bottom:15px;}
 .game-container > .reg > span{vertical-align:top;}
@@ -13,5 +24,7 @@ html{overflow:hidden;}
 .game-container button.sendBtn{position:absolute;left:502px;top:334px;width:42px;height:25px;border:1px #2B7731 solid;text-align:center;border-radius:6px;overflow:hidden;color:#333;background:-webkit-gradient(linear, left top, left bottom, from(#C6C6C6), to(#A0A0A0));}
 .game-container button.cansend{color:#fff;background:-webkit-gradient(linear, left top, left bottom, from(#65D66D), to(#33AA3B));}
 .game-container button.warning{color:#fff;background:-webkit-gradient(linear, left top, left bottom, from(#F43C45), to(#CB0710));}
+.game-container div.sendDir{position:absolute;left:16px;top:12px;overflow:hidden;width:31px;height:29px;background:url(../images/rotate.png) 0 0 no-repeat;}
+.game-container div.dir-right{background:url(../images/rotate.png) 0 -29px no-repeat;}
 .intr > div{padding:5px;font-size:14px;border:1px #666 solid;color:#fff;}
 button{padding:3px 10px;margin:0 5px 10px 0;}
