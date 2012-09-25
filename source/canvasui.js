@@ -1,18 +1,26 @@
-/*
- Author: Xiaole Tao (http://xiaole.happylive.org)
+/**
+ * Created by Xiaole Tao (http://xiaole.happylive.org)
+ * Last update - 2012/09/25.
  */
 (function() {
-	if (window.CanvasRenderingContext2D && window.poker) {
-		/*
-		 -----------
-		 画标签
-		 -----------
-		 x,y 左上角坐标，缺省值0,0
-		 text 文本，缺省为Hello
-		 bLight 是否高亮，缺省为false
-		 nPosition 位置，123左上中上右上，456左下中下右下
-		 例：
-		 canvas.drawLabel(0,400,'Xiaole Tao',true,4);
+	if (window.CanvasRenderingContext2D && window.CanvasRenderingContext2D.roundRect) {
+		/**
+		 * ## Draw label
+		 *
+		 * canvas.drawLabel ([x, y[, text[, bLight[, nPosition]]]])
+		 *
+		 * * x, y      - The x, y coordinate of top left corner of the label in canvas. Default value is 0, 0.
+		 * * text      - The text in label. Default value is 'Hello!'.
+		 * * bLight    - Is the background light color or dark color. Default is boolean false.
+		 * * nPosition - Position of the arrow of label. The value should be one of the value list:
+		 *               [1,2,3,4,5,6]
+		 *               1=>left-up       2=>mid-up       3=>right-up
+		 *               4=>left-bottom   5=>mid-bottom   6=>right-bottom
+		 *               Default value is 1.
+		 *
+		 * Example:
+		 *
+		 * * canvas.drawLabel (10, 10, 'xiaole tao', true, 4);
 		 */
 		CanvasRenderingContext2D.prototype.drawLabel = function(x, y, text, bLight, nPosition) {
 			var x1, fillLinGrad, colorPack, labelHeight = 15, labelWidth;
