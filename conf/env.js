@@ -1,7 +1,7 @@
 this.env = {
 	version : '0.1',
 	nodeStaticVersion : '0.5.9',
-	basePath : '/Workspace/ninety-nine-points'
+	basePath : '/Workspace/99pointsGIT'
 };
 
 this.mappingTable = {
