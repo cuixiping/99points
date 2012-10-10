@@ -5,7 +5,7 @@
 		<meta charset="utf-8" />
 		<link rel="stylesheet" type="text/css" href="resources/css/common.css" />
 		<link rel="stylesheet" type="text/css" href="resources/css/99_index.css" />
-		<script type="text/javascript" src="../lib/poker.min.js"></script>
+		<script type="text/javascript" src="../lib/poker.js"></script>
 		<script type="text/javascript" src="resources/js/99_lib.js"></script>
 		<script type="text/javascript" src="../lib/jquery.min.js" ></script>
 	</head>
@@ -37,50 +37,37 @@
 		<script type="text/javascript">
 		(function(){
 			var ani = Animation,
-				userData = [
+				arr = [
+					{
+						name : 'othella',
+						site  : 0
+					},
 					{
 						name : 'xiaole',
-						site : 9
-					},
-					{
-						name : 'jerrod',
-						site : 0
-					},
-					{
-						name : 'igin',
-						site : 1
-					},
-					{
-						name : 'charlie',
 						site : 2
 					},
 					{
-						name : 'arlen',
+						name : 'jerrod',
+						site : 1
+					},
+					{
+						name : 'igin',
 						site : 3
 					},
 					{
-						name : 'jianye',
-						site : 4
-					},
-					{
-						name : 'jianchun',
-						site : 5
-					},
-					{
 						name : 'zhongjun',
-						site : 6
+						site : 5
 					},
 					{
 						name : 'spark',
 						site : 7
-					},
-					{
-						name : 'othella',
-						site  : 8
 					}
 				];
-			ani.elements.maincanvas = $('#canvas')	
-			ani.scenes.begining(userData);
+				
+			var userData = ani.methods.sortPlayerData(arr, 'jerrod');
+			ani.elements.maincanvas = $('#canvas');
+			ani.data.myFirstCards = ['h3', 'h3', 'h3', 'h3', 'h3'];
+			ani.scenes.begining(userData, 'jerrod');
 		})();
 		</script>
 	</body>

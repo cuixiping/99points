@@ -125,6 +125,34 @@
 			return _a;
 		};
 	};
+	Animation.methods.showPlayerName = function(playername){
+		var ani = Animation,
+			plugin = ani.plugin,
+			data = ani.data,
+			elms = ani.elements,
+			canvas = elms.maincanvas[0],
+			ctx = canvas.getContext('2d')
+			arr = [
+				[370, 442, 3],
+				[174, 442, 3],
+				[14, 260, 6],
+				[52, 100, 4],
+				[254, 12, 4],
+				[385, 12, 4],
+				[508, 12, 4],
+				[724, 102, 4],
+				[734, 260, 4],
+				[546, 442, 3]
+			],
+			i = -1,
+			list = data.playerDataList,
+			len = list.length - 1;
+		for(; i++ < len;){
+			var _ = list[i], _s = arr[_.site];
+			ctx.drawLabel(_s[0], _s[1], _.name, playername && _.name === playername ? true : false, _s[2]);
+		}
+		playername && plugin.playerSendBtn.methods[playername === data.curPlayerName ? 'show' : 'hide']();
+	};
 	Animation.methods.initPockerPlace = function(){
 		var ani = Animation,
 			data = ani.data,
@@ -145,24 +173,36 @@
 		data.pockerPlace = [];
 		data.pockerPoint = [(800 - data.pockerSize[0]) / 2 - 100, (480 - data.pockerSize[1]) / 2 + 10];
 		data.deskSize = [110, 100, 600, 280];
+		data.userObjectPosition = [];
 		for(; i < len; i++){
 			data.pockerPlace[i] = [];
 			var _a = data.pockerPlace[i],
 				_x = arr[i][0],
-				_y = arr[i][1], _d = 0;
+				_y = arr[i][1], _d = 0, _w, _h;
 			if(_x === 375 && _y === 325){
 				_x = 305;
-				_y = 315;
+				_y = 320;
 				for(j = 0; j < 5; j++){
+					_w = data.pockerSize[0] * 1.2;
+					_h = data.pockerSize[1] * 1.2
+					data.userObjectPosition.push({
+						l : _x,
+						t : _y,
+						w : _w,
+						h : _h,
+						idx : j,
+						hadClick : false
+					});
 					_a.push({
 						l : _x,
 						t : _y,
 						d : 0,
 						i : z,
 						v : null,
-						w : data.pockerSize[0] * 1.2,
-						h : data.pockerSize[1] * 1.2,
-						s : true
+						w : _w,
+						h : _h,
+						s : true,
+						isSending : false
 					});
 					_x += data.pockerSize[0] * 1.2 + 4;
 					z++;
@@ -170,15 +210,18 @@
 				continue;
 			}
 			for(j = 0; j < 5; j++){
+				_w = data.pockerSize[0];
+				_h = data.pockerSize[1]
 				_a.push({
 					l : _x,
 					t : _y,
 					d : _d,
 					i : z,
 					v : null,
-					w : data.pockerSize[0],
-					h : data.pockerSize[1],
-					s : false
+					w : _w,
+					h : _h,
+					s : false,
+					isSending : false
 				});
 				_x += 10,
 				_d += 10,
@@ -369,6 +412,7 @@
 			_func_get = isSelf ? function(){
 				var a = _A_get();
 				ctx.drawImage(_card_get, a[0], a[1], a[2], a[3]);
+				pocker.isSending = false;
 			} : function(){
 				var a = _A_get();
 				ctx.save();
@@ -377,7 +421,7 @@
 				ctx.drawImage(_card_get, 0, 0, pocker.w, pocker.h);
 				ctx.restore();
 			};
-			
+		pocker.isSending = true;	
 		status.isSendEnded = false;
 		status.isGetEnded = false;
 		status.isSendAndGet = true;
@@ -386,6 +430,8 @@
 			ctx.clearRect(data.deskSize[0], data.deskSize[1], data.deskSize[2], data.deskSize[3]);
 		}, 1, -1).addFn('drawTheLast', function(){
 			ctx.drawImage(elms.theLastFrame, 0, 0, cWidth, cHeight);
+			methods.drawFraction();
+			status.playerClick && methods.drawPlayerPockers();
 		}, 1, 0).addFn('send&get', function(){
 			if(status.isGetEnded){
 				timer.delFn('clearDeskTop').delFn('drawTheLast').delFn('send&get');
@@ -458,7 +504,6 @@
 		}, 1, 4);
 			
 	};
-	
 	Animation.methods.drawSendedPockers = function(sites, func){
 		var ani = Animation,
 			data = ani.data,
@@ -515,8 +560,138 @@
 			ctx.restore();
 		}	
 	};
+	Animation.methods.drawPlayerPockers = function(){
+		var ani = Animation,
+			data = ani.data,
+			status = ani.status,
+			methods = ani.methods,
+			elms = ani.elements,
+			canvas = elms.maincanvas[0],
+			ctx = canvas.getContext('2d'),
+			i, ni, arr = data.playerClick;
+		ctx.clearRect(296, 312, 215, 67);	
+		for(i = -1, ni = arr.length - 1; i ++ < ni;){
+			var _ = arr[i];
+			_.v && ctx.drawImage(_.v, _.l, _.t, _.w, _.h);
+		}
+	};
+	Animation.methods.drawFraction = function(){
+		var ani = Animation,
+			data = ani.data,
+			status = ani.status,
+			methods = ani.methods,
+			elms = ani.elements,
+			canvas = elms.maincanvas[0],
+			ctx = canvas.getContext('2d');
+		ctx.clearRect(516, 234, 26, 24);
+		ctx.font = "bold 24px serif";
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText(data.fraction, 528, 251, 26);
+	};
 	
-	Animation.scenes.begining = function(userData){
+	Animation.methods.inRectangleArea = function(el, et, ol, ot, ow, oh){
+		return el > ol && el < ol + ow && et > ot && et < ot + oh;
+	}
+	Animation.methods.roundPosition = function(e){
+		var ani = Animation,
+			data = ani.data,
+			status = ani.status,
+			methods = ani.methods,
+			elms = ani.elements,
+			C = elms.maincanvas,
+			canvas = C[0],
+			cWidth = canvas.width,
+			cHeight = canvas.height,
+			ctx = canvas.getContext('2d'),
+			offset = C.offset(),
+			el = e.clientX - offset.left,
+			et = e.clientY - offset.top,
+			find = false,
+			arr = data.userObjectPosition,
+			i = -1,
+			len = arr.length - 1;
+		for(; i ++ < len;){
+			var _ = arr[i];
+			if(methods.inRectangleArea(el, et, _.l, _.t, _.w, _.h)){
+				if(!status.playerClick){
+					methods.chooseClickedPocker(_);
+				}else{
+					if(data.playerClicked === _.idx){
+						methods.restoreClickedPocker(_);
+					}else{
+						methods.restoreClickedPocker(arr[data.playerClicked]);
+						methods.chooseClickedPocker(_);
+					}
+				}
+				find = true;
+			}
+		}
+		if(find){
+			methods.drawPlayerPockers();
+		}
+	};
+	Animation.methods.chooseClickedPocker = function(that){
+		var ani = Animation,
+			plugin = ani.plugin,
+			data = ani.data,
+			status = ani.status,
+			methods = ani.methods,
+			idx = that.idx,
+			j = -1, len = 4;
+		data.pockerPlace[0][idx].l -= 7;
+		data.pockerPlace[0][idx].t -= 7;
+		data.pockerPlace[0][idx].w += 14;
+		data.pockerPlace[0][idx].h += 14;
+		status.playerClick = true;	
+		data.playerClick = [];
+		for(; j++ < len;){
+			j !== that.idx && data.playerClick.push(data.pockerPlace[0][j]);
+		}
+		data.playerClick.push(data.pockerPlace[0][idx]);
+		that.hadClick = true;
+		data.playerClicked = that.idx;
+		//	
+	};
+	Animation.methods.restoreClickedPocker = function(that){
+		var ani = Animation,
+			plugin = ani.plugin,
+			data = ani.data,
+			status = ani.status,
+			methods = ani.methods,
+			idx = that.idx;
+		data.pockerPlace[0][idx].l += 7;
+		data.pockerPlace[0][idx].t += 7;
+		data.pockerPlace[0][idx].w -= 14;
+		data.pockerPlace[0][idx].h -= 14;
+		status.playerClick = false;
+		data.playerClick = data.pockerPlace[0];
+		that.hadClick = false;
+		data.playerClicked = undefined;
+		
+	};
+	Animation.methods.sortPlayerData = function(data, name){
+		var i = -1,
+			len = data.length - 1,
+			idx = 0,
+			arr = [],
+			j = -1;
+		for(; i ++ < len;){
+			if(data[i].name === name){
+				idx = data[i].site;
+				for(;j ++ < len;){
+					var _ = data[j];
+					arr.push({
+						name : _.name,
+						site : _.site < idx ? 9 - idx - _.site : _.site === idx ? 0 : _.site - idx 
+					})
+				}
+				break;
+			}
+		}
+		return arr;
+	};
+	Animation.scenes.begining = function(userData, curPlayerName){
 		var ani = Animation,
 			data = ani.data,
 			status = ani.status,
@@ -529,23 +704,31 @@
 			cHeight = canvas.height,
 			ctx = canvas.getContext('2d');
 		if(!data.pockerPlace){
-			ani.methods.initPockerPlace();
+			methods.initPockerPlace();
 			data.pockerSended = [];
 		}
 		if(!data.pockerList){
-			ani.methods.createPockers();
+			methods.createPockers();
 		}
-		
-		ani.methods.createPointPockers();
+		data.fraction = 0;
+		data.playerDataList = userData;
+		data.curPlayerName = curPlayerName;
+		methods.drawFraction();
+		methods.createPointPockers();
+		methods.showPlayerName()
+		elms.maincanvas.unbind('click').bind('click', methods.roundPosition)
 		
 		~function drawBegining(){
 			var i = 0,
 				z = 0,
 				len = userData.length,
 				idx = 1,
+				Idx = 0,
 				rec;
 			status.isDrawingObject = false;
-			ani.methods.drawTheLastFrame();
+			methods.drawTheLastFrame();
+			ani.plugin.playerSendBtn.binds($('div.game-container'));
+			ani.plugin.changeDir.change('left');
 			timer.addFn('clearDeskTop', function(){
 				ctx.clearRect(data.deskSize[0], data.deskSize[1], data.deskSize[2], data.deskSize[3]);
 			}, 1, -1).addFn('drawTheLast', function(){
@@ -553,21 +736,23 @@
 			}, 1, 0);
 			rec = setInterval(function(){
 				var player = userData[i];
-				methods.sendBeginingPocker([player.site, z], idx, data.pockerList['xb'], 'isDrawingObject', (i + 1) % len === 0 && (z + 1 > 4) ? function(){
+				methods.sendBeginingPocker([player.site, z], idx, player.site === 0 ? (data.pockerList[data.myFirstCards[Idx]]) : data.pockerList['xb'], 'isDrawingObject', (i + 1) % len === 0 && (z + 1 > 4) ? function(){
 					timer.delFn('clearDeskTop').delFn('drawTheLast');
 					status.isDrawingObject = true;
 					function getRan(n){
 						return m.floor(m.random() * n);
 					}
+					//return;
 					var test_n = 0, test_r = setInterval(function(){
 						var _r0 = userData[getRan(len)].site,
 							_r1 = getRan(5);
 						Animation.methods.sendAndGetPocker([_r0, _r1], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random() * 9) + 1)], Animation.data.pockerList[['h','d','s','c'][Math.floor(Math.random()*4)] + (Math.floor(Math.random()*9) + 1)], null);
 						test_n ++;
-						if(test_n > 40){
+						data.fraction = (getRan(99));
+						if(test_n > 80){
 							clearInterval(test_r);
 						}
-					}, 2000);
+					}, 1500);
 				} : null);
 				idx ++;
 				i ++;
@@ -582,10 +767,109 @@
 		}();
 	};
 	
-	
 	window.Animation = Animation;
 })();
 
 (function(){
-	
+	!Animation.plugin && (Animation.plugin = new Object());
+	Animation.plugin.playerSendBtn = {
+		status : {
+			canSend : false,
+			hadSelect : false
+		},
+		methods : {
+			create : function(parent){
+				var html = '<button id="J-playerSendBtn" class="sendBtn" style="display:none;">Drop<\/button>';
+				parent.append(html);
+				return parent.find('button.sendBtn');
+			},
+			click : function(){
+				var ani = Animation,
+					plugin = ani.plugin,
+					playerSendBtn = plugin.playerSendBtn,
+					methods = playerSendBtn.methods,
+					status = playerSendBtn.status;
+				if(!status.canSend && !status.hadSelect){
+					return;
+				}
+				
+			},
+			canclick : function(){
+				var ani = Animation,
+					plugin = ani.plugin,
+					playerSendBtn = plugin.playerSendBtn,
+					methods = playerSendBtn.methods,
+					status = playerSendBtn.status;
+				status.canSend = true;
+				playerSendBtn.elms.btn.hide().removeClass('warning').addClass('canclick');
+			},
+			warning : function(){
+				var ani = Animation,
+					plugin = ani.plugin,
+					playerSendBtn = plugin.playerSendBtn,
+					methods = playerSendBtn.methods,
+					status = playerSendBtn.status;
+				status.canSend = false;
+				playerSendBtn.elms.btn.hide().removeClass('canclick').addClass('warning');
+			},
+			show : function(){
+				var ani = Animation,
+					plugin = ani.plugin,
+					playerSendBtn = plugin.playerSendBtn,
+					methods = playerSendBtn.methods,
+					status = playerSendBtn.status;
+				status.canSend = false;
+				playerSendBtn.elms.btn.removeClass('warning canclick').show();
+			},
+			hide : function(){
+				var ani = Animation,
+					plugin = ani.plugin,
+					playerSendBtn = plugin.playerSendBtn,
+					methods = playerSendBtn.methods,
+					status = playerSendBtn.status;
+				playerSendBtn.elms.btn.hide().removeClass('warning canclick');
+				status.canSend = false;
+				status.hadSelect = false;
+			}
+		},
+		binds : function(parent){
+			var ani = Animation,
+				plugin = ani.plugin,
+				playerSendBtn = plugin.playerSendBtn,
+				methods = playerSendBtn.methods;
+			playerSendBtn.elms = new Object();
+			playerSendBtn.elms.btn = methods.create(parent);	
+			playerSendBtn.elms.btn.bind(methods.click);
+		}
+	};
 })();
+
+(function(){
+	Animation.plugin.changeDir = {
+		status : 'left',
+		change : function(dir){
+			var ani = Animation,
+				plugin = ani.plugin,
+				changeDir = plugin.changeDir,
+				elms = changeDir.elms || (changeDir.elms = new Object()),
+				status = changeDir.status;
+			if(!$('#J-pockerSendDir')[0]){
+				$('div.game-container').append('<div id="J-pockerSendDir" class="sendDir"><\/div>');
+			}
+			!elms.icon && (elms.icon = $('#J-pockerSendDir'));
+			!dir && (dir = 'left');
+			elms.icon[dir === 'left' ?  'removeClass' : 'addClass']('dir-right');
+			status = dir;
+		}
+	};
+})();
+
+(function(){
+	Animation.plugin.seat = {
+		status : {
+			
+		}
+	};
+})();
+
+

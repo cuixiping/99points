@@ -16,16 +16,18 @@
 				showpoker(100);
 			}
 			function showpoker(h) {
-				if(poker.enabled) {poker.w = 0.75 * h, poker.h = +(h);
+				if (poker) {
+					poker.w = 0.75 * h, poker.h = +(h);
 					ct = ctx = document.getElementById('ct');
 					ct.width = ct.width;
 					ctx = ct.getContext('2d');
 					var x = 0, y = 0, suits = ['hearts', 'diamonds', 'spades', 'clubs'], points = ['a', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'j', 'q', 'k'];
-					for(var ks in suits) {
-						for(var kp in points) {
+					for (var ks in suits) {
+						for (var kp in points) {
 							ctx.drawPokerCard(x, y, poker.h, suits[Math.floor(Math.random(3) * 4)], points[Math.floor(Math.random(3) * 13)]);
 							x += poker.w;
-						} x = 0, y += poker.h;
+						}
+						x = 0, y += poker.h;
 					}
 					ctx.drawPokerCard( x = 0, y, poker.h, 'hearts', 'joker');
 					ctx.drawPokerCard(x += poker.w, y, poker.h, 'spades', 'joker');
