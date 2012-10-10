@@ -12,9 +12,14 @@
 * 服务器端代码使用Node.Js + Socket.io + Node.static构建；
 * 前后端都开源。
 
+  目前正在开发中，可能无法完整运行。
+
+  依赖的第三方库有Node.Js, Socket.io, Node.static, 请自行下载安装。
+
 #主创人员
-* Igin (@cuixiping), Xiaole (@Tairraos), Jerrod (@hehe123).
-* 目前正在开发中，可能无法完整运行。
+* [Igin] (https://github.com/cuixiping)
+* [Xiaole] (https://github.com/Tairraos)
+* [Jerrod] (https://github.com/hehe123).
 
 #游戏规则介绍
 
