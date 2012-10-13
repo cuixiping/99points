@@ -1,9 +1,14 @@
 /**
+ * MIT license source code.
+ *
+ * canvasui.js
  * Created by Xiaole Tao (http://xiaole.happylive.org)
- * Last update - 2012/09/25.
+ * Last update - 2012/10/13.
+ *
+ * File for 99 point project only.
  */
 (function() {
-	if (window.CanvasRenderingContext2D && window.CanvasRenderingContext2D.roundRect) {
+	if (window.Poker) {
 		/**
 		 * ## Draw label
 		 *
