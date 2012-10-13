@@ -77,11 +77,11 @@ mgr.of('/99points').on('connection', function (socket) {
 
 var actions = {
 	messageInTable : function (data){
-		mgr.of('/99points').in('table01').emit('message', data);
+		mgr.of('/99points')['in']('table01').emit('message', data);
 	}
 };
 
-//var ns_room = mgr.of('/99points').in('table01');
+//var ns_room = mgr.of('/99points')['in']('table01');
 
 var tableSockets=null;
 var game=new Game();
@@ -100,7 +100,7 @@ var handlers = {
 		socket.emit('message', {op:'welcome', data:'Hi, '+data});
 		//of,in方法返回的是一个SocketNamespace实例
 		//SocketNamespace.sockets 是一个json hash map.
-		tableSockets = mgr.of('/99points').in('table01').sockets;
+		tableSockets = mgr.of('/99points')['in']('table01').sockets;
 		tableSockets[socket.id].user = socket.user = {id: socket.id, name: data || 'Guest'};
 
 		handlers.playerJoin(socket);
@@ -108,7 +108,7 @@ var handlers = {
 		handlers.getPlayers(socket);
 
 		//test
-		//var ns_room = mgr.of('/99points').in('table01');
+		//var ns_room = mgr.of('/99points')['in']('table01');
 		//ns_room.except(socket.id).emit('message', {op:'test', data:'test except ************'}).setFlags();
 		//ns_room.socket(socket.id).emit('message', {op:'test', data:'test socket ************'});
 	},
@@ -218,7 +218,7 @@ var emit_play = {
 		emit_play_msg(data.seat, null, null, data_all);
 	},
 	exchange : function (socket, data){
-		var room = mgr.of('/99points').in('table01');
+		var room = mgr.of('/99points')['in']('table01');
 		var player_id = game.players[player_seat].id;
 		var play_id = game.players[play_seat].id;
 		room.socket(player_id).emit('message', {op:'play', data:{type:'exchange',player_seat:data.player_seat,play_seat:data.play_seat,cards:data.cards1}});
@@ -226,13 +226,13 @@ var emit_play = {
 		room.except(player_id).except(play_id).emit('message', {op:'play', data:{type:'exchange',player_seat:data.player_seat,play_seat:data.play_seat}}).setFlags();
 	},
 	steal : function (socket, data, card){
-		var room = mgr.of('/99points').in('table01');
+		var room = mgr.of('/99points')['in']('table01');
 		var player_id = game.players[player_seat].id;
 		room.socket(player_id).emit('message', {op:'play', data:{type:'steal',player_seat:data.player_seat,play_seat:data.play_seat,cards:data.cards}});
 		room.except(player_id).emit('message', {op:'play', data:{type:'steal',player_seat:data.player_seat,play_seat:data.play_seat,card:data.card}}).setFlags();
 	},
 	harm : function (socket, data, cards){
-		var room = mgr.of('/99points').in('table01');
+		var room = mgr.of('/99points')['in']('table01');
 		var player_id = game.players[player_seat].id;
 		var play_id = game.players[play_seat].id;
 		room.socket(play_id).emit('message', {op:'play', data:{type:'harm',player_seat:data.player_seat,play_seat:data.play_seat,card:data.card,cards:data.cards}});
@@ -249,7 +249,7 @@ function emit_play_msg(seat, data_private, data_others, data_all){
 		return;
 	}
 	var id = game.players[seat].id;
-	var room = mgr.of('/99points').in('table01');
+	var room = mgr.of('/99points')['in']('table01');
 	if(data_private){
 		room.socket(id).emit('message', data_private);
 	}
