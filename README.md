@@ -18,7 +18,7 @@
 
 #主创人员
 * [Igin] (https://github.com/cuixiping)
-* [Xiaole] (http://xiaole.happylive.org)
+* [Xiaole] (https://github.com/Tairraos)
 * [Jerrod] (https://github.com/hehe123)
 
 #游戏规则介绍
