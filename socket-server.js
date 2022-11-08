@@ -1,5 +1,5 @@
 function connect(player) {
-	console.log('请求socket连接：' + player);
+	console.log('connecting socket to: ' + player);
 	return '';
 
 }

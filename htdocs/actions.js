@@ -81,8 +81,8 @@ chat : function (){
 	else{
 		alert('please input message');
 	}
-}
-,onclick_seat : function (seat){
+},
+onclick_seat : function (seat){
 	if(!request_me){
 		return;
 	}
@@ -93,8 +93,8 @@ chat : function (){
 		}
 		socket.emit('message', {op:'play', data:{seat:seat}});
 	}
-}
-,onclick_card : function (seat,card){
+},
+onclick_card : function (seat,card){
 	if(!request_me){
 		return;
 	}

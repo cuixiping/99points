@@ -3,7 +3,7 @@
 
 99points is a multi-player online card game developed by html5 and javascript.
 
-![screenshot01](http://cuixiping.github.com/99points/images/screenshot01.jpg)
+![screenshot01](https://cuixiping.github.io/99points/images/screenshot01.jpg)
 
 # “99分”html5游戏项目简介：
 * 在浏览器里玩的多人99分扑克牌游戏；

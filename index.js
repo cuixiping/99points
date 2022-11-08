@@ -4,7 +4,7 @@ var http = require('http'),
 
 var staticServer = new (webServer.Server)(conf.env.basePath + '/htdocs');
 
-console.log('静态文件服务启动，80端口');
+console.log('Static server is starting at port of 80');
 http.createServer(function(request, response) {
 	request.addListener('end', function() {
 		staticServer.serve(request, response);
@@ -13,7 +13,7 @@ http.createServer(function(request, response) {
 
 
 /*
-console.log('Socket服务启动，9433端口');
+console.log('Socket server is starting at port of 9433');
 http.createServer(function(request, response) {
 	request.addListener('end', function() {
 		staticServer.serve(request, response);
